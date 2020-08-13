@@ -19,7 +19,6 @@ int main()
 
   RING_QUEUE queue;
   RING_QUEUE_METHOD(init)(&queue);
-  //ring_queue_char_128_static_debug();
 
   {
     int entry;

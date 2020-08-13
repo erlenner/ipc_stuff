@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 #include "macros.h"
 
 #ifndef RING_SIZE
@@ -22,12 +20,6 @@ typedef struct
   int write_index;
   RING_STORAGE buffer[RING_SIZE];
 } RING_QUEUE;
-
-static inline void RING_QUEUE_METHOD(static_debug)()
-{
-  printf("size of: %ld %ld %ld\n", sizeof(RING_STORAGE), sizeof(RING_STORAGE*), sizeof(RING_QUEUE));
-}
-
 
 // interface inspired by boost: https://github.com/boostorg/lockfree/blob/develop/include/boost/lockfree/spsc_queue.hpp
 
