@@ -15,6 +15,8 @@ _Static_assert(0, "RING_STORAGE not defined")
 #define GET_RING_QUEUE(storage, size) CAT5(ring_queue, _, storage, _, size)
 #define GET_RING_QUEUE_METHOD(method, storage, size) CAT3(GET_RING_QUEUE(storage, size), _, method)
 
+#define GET_RING_QUEUE_GENERIC_ENTRY(method, queue, storage, size, ...) GET_RING_QUEUE(storage, size)*: GET_RING_QUEUE_METHOD(method, storage, size)(queue COMMA(__VA_ARGS__))
+
 #define RING_QUEUE GET_RING_QUEUE(RING_STORAGE, RING_SIZE)
 #define RING_QUEUE_METHOD(method) GET_RING_QUEUE_METHOD(method, RING_STORAGE, RING_SIZE)
 

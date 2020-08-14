@@ -12,6 +12,6 @@
 #undef RING_SIZE
 
 #define RING_QUEUE(method, queue, ...) _Generic((queue),\
-  GET_RING_QUEUE(int, 64)*: GET_RING_QUEUE_METHOD(method, int, 64)((GET_RING_QUEUE(int, 64)*)queue COMMA(__VA_ARGS__))\
-  ,GET_RING_QUEUE(char, 128)*: GET_RING_QUEUE_METHOD(method, char, 128)((GET_RING_QUEUE(char, 128)*)queue COMMA(__VA_ARGS__))\
+  GET_RING_QUEUE_GENERIC_ENTRY(method, queue, int, 64, __VA_ARGS__)\
+  , GET_RING_QUEUE_GENERIC_ENTRY(method, queue, char, 128, __VA_ARGS__)\
 )
