@@ -9,7 +9,7 @@
 //#undef RING_SIZE
 //#undef RING_STORAGE
 
-RING_QUEUE_DEF(int, 64) ring_queue;
+ring_queue_def(int, 64) ring_queue;
 
 
 int main()
@@ -18,21 +18,21 @@ int main()
   printf("main\n");
 
 
-  ring_queue queue = RING_QUEUE_INST(int, 64)
+  ring_queue queue = ring_queue_inst(int, 64);
 
   {
     int entry;
     entry=5;
     int err;
-    RING_QUEUE_PUSH(queue, entry, err)
+    ring_queue_push(queue, entry, err);
     printf("err: %d\n", err);
 
     entry=3;
-    RING_QUEUE_PUSH(queue, entry)
+    ring_queue_push(queue, entry);
     entry=127;
-    RING_QUEUE_PUSH(queue, entry)
+    ring_queue_push(queue, entry);
     entry=128;
-    RING_QUEUE_PUSH(queue, entry)
+    ring_queue_push(queue, entry);
   }
 
   {
@@ -40,7 +40,7 @@ int main()
     for (int i=0; i<7; ++i)
     {
       int err;
-      RING_QUEUE_EAT(queue, entry, err)
+      ring_queue_eat(queue, entry, err);
       printf("err, eaten: %d %d\n", err, entry);
     }
   }
@@ -49,11 +49,11 @@ int main()
   {
     int entry;
     entry=45;
-    RING_QUEUE_PUSH(queue, entry)
+    ring_queue_push(queue, entry);
     entry=35;
-    RING_QUEUE_PUSH(queue, entry)
+    ring_queue_push(queue, entry);
     entry=25;
-    RING_QUEUE_PUSH(queue, entry)
+    ring_queue_push(queue, entry);
   }
 
   {
@@ -61,7 +61,7 @@ int main()
     for (int i=0; i<7; ++i)
     {
       int err;
-      RING_QUEUE_EAT(queue, entry, err)
+      ring_queue_eat(queue, entry, err);
       printf("err, eaten: %d %d\n", err, entry);
     }
   }
