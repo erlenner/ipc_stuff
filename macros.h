@@ -1,5 +1,9 @@
 #pragma once
 
+// for parameters in function calls
+#define COMMA(...) , ##__VA_ARGS__
+
+// http://saadahmad.ca/cc-preprocessor-metaprogramming-evaluating-and-defering-macro-calls/
 #define EVAL(...) __VA_ARGS__
 
 // Concatenation
