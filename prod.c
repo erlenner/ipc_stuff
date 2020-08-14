@@ -3,15 +3,13 @@
 #include "ring_queue.h"
 
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wincompatible-pointer-types"
-
-
 //#define RING_STORAGE char
 //#define RING_SIZE 128
 //#include "ring_queue_impl.h"
 //#undef RING_SIZE
 //#undef RING_STORAGE
+
+RING_QUEUE_DEF(int, 64) ring_queue;
 
 
 int main()
@@ -20,30 +18,30 @@ int main()
   printf("main\n");
 
 
-  GET_RING_QUEUE(int, 64) queue;
-  RING_QUEUE(init, &queue);
-
-  //GET_RING_QUEUE(char, 128) queue2;
-  //RING_QUEUE(init, &queue2);
+  ring_queue queue = RING_QUEUE_INST(int, 64)
 
   {
     int entry;
     entry=5;
-    RING_QUEUE(push, &queue, &entry);
+    int err;
+    RING_QUEUE_PUSH(queue, entry, err)
+    printf("err: %d\n", err);
+
     entry=3;
-    RING_QUEUE(push, &queue, &entry);
+    RING_QUEUE_PUSH(queue, entry)
     entry=127;
-    RING_QUEUE(push, &queue, &entry);
+    RING_QUEUE_PUSH(queue, entry)
     entry=128;
-    RING_QUEUE(push, &queue, &entry);
+    RING_QUEUE_PUSH(queue, entry)
   }
 
   {
     int entry;
     for (int i=0; i<7; ++i)
     {
-      int ret = RING_QUEUE(eat, &queue, &entry);
-      printf("ret, eaten: %d %d\n", ret, entry);
+      int err;
+      RING_QUEUE_EAT(queue, entry, err)
+      printf("err, eaten: %d %d\n", err, entry);
     }
   }
 
@@ -51,19 +49,20 @@ int main()
   {
     int entry;
     entry=45;
-    RING_QUEUE(push, &queue, &entry);
+    RING_QUEUE_PUSH(queue, entry)
     entry=35;
-    RING_QUEUE(push, &queue, &entry);
+    RING_QUEUE_PUSH(queue, entry)
     entry=25;
-    RING_QUEUE(push, &queue, &entry);
+    RING_QUEUE_PUSH(queue, entry)
   }
 
   {
     int entry;
     for (int i=0; i<7; ++i)
     {
-      int ret = RING_QUEUE(eat, &queue, &entry);
-      printf("ret, eaten: %d %d\n", ret, entry);
+      int err;
+      RING_QUEUE_EAT(queue, entry, err)
+      printf("err, eaten: %d %d\n", err, entry);
     }
   }
   for (int i=0; i<64; ++i)
@@ -74,5 +73,3 @@ int main()
   printf("done\n");
   return 0;
 }
-
-#pragma GCC diagnostic pop
