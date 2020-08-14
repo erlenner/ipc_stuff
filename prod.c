@@ -3,6 +3,8 @@
 #define RING_STORAGE int
 #define RING_SIZE 64
 #include "ring_queue.h"
+RING_QUEUE queue;
+#undef RING_QUEUE
 #undef RING_STORAGE
 #undef RING_SIZE
 
@@ -12,7 +14,6 @@ int main()
   printf("main\n");
 
 
-  ring_queue queue;
   init(&queue);
 
   {
