@@ -23,35 +23,53 @@ typedef struct                                                              \
 
 #define next_index(index, size) (((index) + 1) & ((size)-1))
 
+#define prev_index(index, size) (((index) - 1) & ((size)-1))
+
 //                                   error
 #define ring_queue_push(queue, entry, ...)                              \
 do {                                                                    \
   int wi = __atomic_load_n(&(queue)->write_index, __ATOMIC_RELAXED);    \
-  int next = next_index((queue)->write_index, (queue)->size);           \
+  wi = next_index(wi, (queue)->size);                                   \
                                                                         \
-  if (next == __atomic_load_n(&(queue)->read_index, __ATOMIC_ACQUIRE))  \
+  if (wi == __atomic_load_n(&(queue)->read_index, __ATOMIC_ACQUIRE))    \
     OPT_SET(1, __VA_ARGS__)                                             \
   else                                                                  \
   {                                                                     \
     (queue)->buffer[wi] = entry;                                        \
-    __atomic_store_n(&(queue)->write_index, next, __ATOMIC_RELEASE);    \
+    __atomic_store_n(&(queue)->write_index, wi, __ATOMIC_RELEASE);      \
     OPT_SET(0, __VA_ARGS__)                                             \
   }                                                                     \
 } while(0)
 
 //                                  error
-#define ring_queue_eat(queue, entry, ...)                             \
-do {                                                                  \
-  int wi = __atomic_load_n(&(queue)->write_index, __ATOMIC_ACQUIRE);  \
-  int ri = __atomic_load_n(&(queue)->read_index, __ATOMIC_RELAXED);   \
-                                                                      \
-  if (ri == wi)                                                       \
-    OPT_SET(1, __VA_ARGS__)                                           \
-  else                                                                \
-  {                                                                   \
-    entry = (queue)->buffer[ri];                                      \
-    int next = next_index((queue)->read_index, (queue)->size);        \
-    __atomic_store_n(&(queue)->read_index, next, __ATOMIC_RELEASE);   \
-    OPT_SET(0, __VA_ARGS__)                                           \
-  }                                                                   \
+#define ring_queue_eat(queue, entry, ...)                                   \
+do {                                                                        \
+  const int wi = __atomic_load_n(&(queue)->write_index, __ATOMIC_ACQUIRE);  \
+  int ri = __atomic_load_n(&(queue)->read_index, __ATOMIC_RELAXED);         \
+                                                                            \
+  if (ri == wi)                                                             \
+    OPT_SET(1, __VA_ARGS__)                                                 \
+  else                                                                      \
+  {                                                                         \
+    ri = next_index(ri, (queue)->size);                                     \
+    entry = (queue)->buffer[ri];                                            \
+    __atomic_store_n(&(queue)->read_index, ri, __ATOMIC_RELEASE);           \
+    OPT_SET(0, __VA_ARGS__)                                                 \
+  }                                                                         \
+} while(0)
+
+#define ring_queue_eat_last(queue, entry, ...)                              \
+do {                                                                        \
+  const int wi = __atomic_load_n(&(queue)->write_index, __ATOMIC_ACQUIRE);  \
+  int ri = __atomic_load_n(&(queue)->read_index, __ATOMIC_RELAXED);         \
+                                                                            \
+  if (ri == wi)                                                             \
+    OPT_SET(1, __VA_ARGS__)                                                 \
+  else                                                                      \
+  {                                                                         \
+    ri = wi;                                                                \
+    entry = (queue)->buffer[ri];                                            \
+    __atomic_store_n(&(queue)->read_index, ri, __ATOMIC_RELEASE);           \
+    OPT_SET(0, __VA_ARGS__)                                                 \
+  }                                                                         \
 } while(0)

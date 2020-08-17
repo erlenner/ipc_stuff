@@ -1,16 +1,24 @@
 #include <stdio.h>
+#include <signal.h>
 
 #include "ring_queue.h"
 #include "ipc.h"
 #include "debug.h"
 
-#define RING_SIZE 4
+#define RING_SIZE 64
 ring_queue_def(int, RING_SIZE) ring_queue;
 
+ring_queue* queue;
+int run = 1;
+
+void sig_handler(int sig)
+{
+  run = 0;
+}
 
 int main()
 {
-  ring_queue* queue = (ring_queue*)ipc_create(sizeof(ring_queue));
+  queue = (ring_queue*)ipc_create(sizeof(ring_queue));
   debug_assert(queue != NULL, return -1);
 
   {
@@ -19,53 +27,16 @@ int main()
     memcpy(queue, &tmp, sizeof(ring_queue));
   }
 
+  signal(SIGINT, sig_handler);
+
+  while (run)
   {
+    static int entry=0;
     int err;
-    int entry;
-
-    entry=5;
-    ring_queue_push(queue, entry, err);
+    ring_queue_push(queue, entry++, err);
     debug_assert(err == 0);
-    entry=3;
-    ring_queue_push(queue, entry, err);
-    debug_assert(err == 0);
-    entry=127;
-    ring_queue_push(queue, entry, err);
-    debug_assert(err == 0);
-    entry=110;
-    ring_queue_push(queue, entry, err);
-    debug_assert(err == 0);
+    usleep(3 * 1000);
   }
-
-  debug("prod: ");
-  for (int i=0; i<queue->size; ++i)
-    printf("%d ", queue->buffer[i]);
-  printf("\n");
-
-  sleep(2);
-
-  {
-    int err;
-    int entry;
-    entry=45;
-    ring_queue_push(queue, entry, err);
-    debug_assert(err == 0);
-    entry=35;
-    ring_queue_push(queue, entry, err);
-    debug_assert(err == 0);
-    entry=25;
-    ring_queue_push(queue, entry, err);
-    debug_assert(err == 0);
-  }
-
-  debug("prod: ");
-  for (int i=0; i<queue->size; ++i)
-    printf("%d ", queue->buffer[i]);
-  printf("\n");
-
-
-  sleep(2);
-
 
   ipc_destroy((void*)queue, sizeof(ring_queue));
 
