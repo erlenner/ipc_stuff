@@ -2,7 +2,7 @@
 #include "ipc.h"
 
 
-#define RING_SIZE 8
+#define RING_SIZE 4
 ring_queue_def(int, RING_SIZE) ring_queue;
 
 int main()
@@ -13,26 +13,31 @@ int main()
 
 
   {
+    printf("cons: ");
     int entry;
-    for (int i=0; i<7; ++i)
+    int err;
+    do
     {
-      int err;
       ring_queue_eat(queue, entry, err);
-      printf("err, eaten: %d %d\n", err, entry);
+      printf(" %d", entry);
     }
+    while (err == 0);
+    printf("\n");
   }
-  printf("\n");
 
   sleep(2);
 
   {
+    printf("cons: ");
     int entry;
-    for (int i=0; i<7; ++i)
+    int err;
+    do
     {
-      int err;
       ring_queue_eat(queue, entry, err);
-      printf("err, eaten: %d %d\n", err, entry);
+      printf(" %d", entry);
     }
+    while (err == 0);
+    printf("\n");
   }
 
   ipc_unmap((void*)queue, sizeof(ring_queue));
