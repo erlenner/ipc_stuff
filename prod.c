@@ -3,7 +3,7 @@
 #include "ring_queue.h"
 #include "ipc.h"
 
-#define RING_SIZE 64
+#define RING_SIZE 8
 ring_queue_def(int, RING_SIZE) ring_queue;
 
 
@@ -19,30 +19,41 @@ int main()
   }
 
   {
-    int entry;
-    entry=5;
     int err;
-    ring_queue_push(queue, entry, err);
-    printf("err: %d\n", err);
+    int entry;
 
+    entry=5;
+    ring_queue_push(queue, entry, err);
+    debug_assert(err == 0);
     entry=3;
-    ring_queue_push(queue, entry);
+    ring_queue_push(queue, entry, err);
+    debug_assert(err == 0);
     entry=127;
-    ring_queue_push(queue, entry);
-    entry=128;
-    ring_queue_push(queue, entry);
+    ring_queue_push(queue, entry, err);
+    debug_assert(err == 0);
+    entry=110;
+    ring_queue_push(queue, entry, err);
+    debug_assert(err == 0);
   }
+
+  for (int i=0; i<queue->size; ++i)
+    printf("%d ", queue->buffer[i]);
+  printf("\n");
 
   sleep(2);
 
   {
+    int err;
     int entry;
     entry=45;
-    ring_queue_push(queue, entry);
+    ring_queue_push(queue, entry, err);
+    debug_assert(err == 0);
     entry=35;
-    ring_queue_push(queue, entry);
+    ring_queue_push(queue, entry, err);
+    debug_assert(err == 0);
     entry=25;
-    ring_queue_push(queue, entry);
+    ring_queue_push(queue, entry, err);
+    debug_assert(err == 0);
   }
 
   sleep(2);

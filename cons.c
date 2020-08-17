@@ -2,7 +2,7 @@
 #include "ipc.h"
 
 
-#define RING_SIZE 64
+#define RING_SIZE 8
 ring_queue_def(int, RING_SIZE) ring_queue;
 
 int main()
