@@ -20,7 +20,7 @@ void* ipc_create(int size)
   res = ftruncate(fd, size);
   debug_assert(res == 0, return NULL);
 
-  addr = mmap(NULL, size, PROT_WRITE, MAP_SHARED, fd, 0);
+  addr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
   debug_assert(addr != MAP_FAILED, return NULL);
 
   return addr;
@@ -46,10 +46,10 @@ void* ipc_open(int size)
   int fd;
   void *addr;
 
-  fd = shm_open(STORAGE_ID, O_RDONLY, S_IRUSR | S_IWUSR);
+  fd = shm_open(STORAGE_ID, O_RDWR, S_IRUSR | S_IWUSR);
   debug_assert(fd != -1, return NULL);
 
-  addr = mmap(NULL, size, PROT_READ, MAP_SHARED, fd, 0);
+  addr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
   debug_assert(addr != MAP_FAILED, return NULL);
 
   return addr;

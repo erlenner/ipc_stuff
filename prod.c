@@ -3,37 +3,20 @@
 #include "ring_queue.h"
 #include "ipc.h"
 
-
-//#define RING_STORAGE char
-//#define RING_SIZE 128
-//#include "ring_queue_impl.h"
-//#undef RING_SIZE
-//#undef RING_STORAGE
-
-ring_queue_def(int, 64) my_ring_queue;
+#define RING_SIZE 64
+ring_queue_def(int, RING_SIZE) ring_queue;
 
 
 int main()
 {
-  
-  printf("main\n");
+  ring_queue* queue = (ring_queue*)ipc_create(sizeof(ring_queue));
+  debug_assert(queue != NULL, return -1);
 
-  const int size = 16;
-
-  int *buf = ipc_create(size);
-
-  // place data into memory
-  buf[0] = 645;
-
-  // wait for someone to read it
-  sleep(2);
-
-  ipc_destroy(buf, size);
-
-
-
-
-  my_ring_queue queue = ring_queue_inst(int, 64);
+  {
+    // initialize struct
+    ring_queue tmp = ring_queue_inst(int, RING_SIZE);
+    memcpy(queue, &tmp, sizeof(ring_queue));
+  }
 
   {
     int entry;
@@ -50,17 +33,8 @@ int main()
     ring_queue_push(queue, entry);
   }
 
-  {
-    int entry;
-    for (int i=0; i<7; ++i)
-    {
-      int err;
-      ring_queue_eat(queue, entry, err);
-      printf("err, eaten: %d %d\n", err, entry);
-    }
-  }
+  sleep(2);
 
-  printf("\n");
   {
     int entry;
     entry=45;
@@ -71,20 +45,18 @@ int main()
     ring_queue_push(queue, entry);
   }
 
-  {
-    int entry;
-    for (int i=0; i<7; ++i)
-    {
-      int err;
-      ring_queue_eat(queue, entry, err);
-      printf("err, eaten: %d %d\n", err, entry);
-    }
-  }
-  for (int i=0; i<64; ++i)
-    printf("%d ", queue.buffer[i]);
+  sleep(2);
 
+  for (int i=0; i<queue->size; ++i)
+    printf("%d ", queue->buffer[i]);
   printf("\n");
 
-  printf("done\n");
+
+
+
+
+
+  ipc_destroy((void*)queue, sizeof(ring_queue));
+
   return 0;
 }
