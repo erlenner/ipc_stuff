@@ -2,6 +2,7 @@
 
 #include "ring_queue.h"
 #include "ipc.h"
+#include "debug.h"
 
 #define RING_SIZE 4
 ring_queue_def(int, RING_SIZE) ring_queue;
@@ -36,7 +37,7 @@ int main()
     debug_assert(err == 0);
   }
 
-  printf("prod: ");
+  debug("prod: ");
   for (int i=0; i<queue->size; ++i)
     printf("%d ", queue->buffer[i]);
   printf("\n");
@@ -57,7 +58,7 @@ int main()
     debug_assert(err == 0);
   }
 
-  printf("prod: ");
+  debug("prod: ");
   for (int i=0; i<queue->size; ++i)
     printf("%d ", queue->buffer[i]);
   printf("\n");

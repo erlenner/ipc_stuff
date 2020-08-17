@@ -1,6 +1,8 @@
+#include <stdio.h>
+
 #include "ring_queue.h"
 #include "ipc.h"
-
+#include "debug.h"
 
 #define RING_SIZE 4
 ring_queue_def(int, RING_SIZE) ring_queue;
@@ -13,7 +15,7 @@ int main()
 
 
   {
-    printf("cons: ");
+    debug("cons: ");
     int entry;
     int err;
     do
@@ -28,7 +30,7 @@ int main()
   sleep(2);
 
   {
-    printf("cons: ");
+    debug("cons: ");
     int entry;
     int err;
     do

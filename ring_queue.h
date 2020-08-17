@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 #define ring_queue_def(STORAGE, SIZE)\
 _Static_assert((SIZE & (SIZE - 1)) == 0, "SIZE not binary exponent (2^n)"); \
 typedef struct                                                              \
