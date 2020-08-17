@@ -1,5 +1,12 @@
-run: prod.c ring_queue.h
-	gcc -Wall -o runprod prod.c
+.PHONY: all
+all: runprod runcons
 
-#run: cons.c ring_queue.h
-#	gcc -o runcons cons.c
+runprod: prod.c ring_queue.h ipc.h
+	gcc -Wall -o runprod prod.c -lrt
+
+runcons: cons.c ring_queue.h ipc.h
+	gcc -Wall -o runcons cons.c -lrt
+
+.PHONY: clean
+clean:
+	rm runprod runcons

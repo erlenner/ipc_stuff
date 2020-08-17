@@ -1,13 +1,13 @@
 #include <stdio.h>
 
 #define ring_queue_def(STORAGE, SIZE)\
-_Static_assert((SIZE & (SIZE - 1)) == 0, "SIZE not binary exponent (2^n)");\
-typedef struct\
-{\
-  int read_index;\
-  int write_index;\
-  const int size;\
-  STORAGE buffer[SIZE];\
+_Static_assert((SIZE & (SIZE - 1)) == 0, "SIZE not binary exponent (2^n)"); \
+typedef struct                                                              \
+{                                                                           \
+  int read_index;                                                           \
+  int write_index;                                                          \
+  const int size;                                                           \
+  STORAGE buffer[SIZE];                                                     \
 }
 
 #define ring_queue_inst(STORAGE, SIZE)  \

@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "ring_queue.h"
+#include "ipc.h"
 
 
 //#define RING_STORAGE char
@@ -9,7 +10,7 @@
 //#undef RING_SIZE
 //#undef RING_STORAGE
 
-ring_queue_def(int, 64) ring_queue;
+ring_queue_def(int, 64) my_ring_queue;
 
 
 int main()
@@ -17,8 +18,22 @@ int main()
   
   printf("main\n");
 
+  const int size = 16;
 
-  ring_queue queue = ring_queue_inst(int, 64);
+  int *buf = ipc_create(size);
+
+  // place data into memory
+  buf[0] = 645;
+
+  // wait for someone to read it
+  sleep(2);
+
+  ipc_destroy(buf, size);
+
+
+
+
+  my_ring_queue queue = ring_queue_inst(int, 64);
 
   {
     int entry;
