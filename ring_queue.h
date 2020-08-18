@@ -1,18 +1,24 @@
+#define MX6_CACHELINE_BYTES 32
+#define CACHELINE_BYTES MX6_CACHELINE_BYTES
+// L1: https://developer.arm.com/documentation/ddi0388/f/Level-1-Memory-System/About-the-L1-memory-system
+// L2: https://community.nxp.com/thread/510105
+
 #define ring_queue_def(STORAGE, SIZE)\
 _Static_assert((SIZE & (SIZE - 1)) == 0, "SIZE not binary exponent (2^n)"); \
 typedef struct                                                              \
 {                                                                           \
-  int read_index;                                                           \
-  int write_index;                                                          \
   const int size;                                                           \
+  int read_index;                                                           \
+  char padding[CACHELINE_BYTES - 2*sizeof(int)];                            \
+  int write_index;                                                          \
   STORAGE buffer[SIZE];                                                     \
-}
+} __attribute__ ((aligned(CACHELINE_BYTES)))
 
 #define ring_queue_inst(STORAGE, SIZE)  \
 {                                       \
+  .size=SIZE,                           \
   .read_index=0,                        \
   .write_index=0,                       \
-  .size=SIZE,                           \
   .buffer = {},                         \
 }
 

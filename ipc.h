@@ -13,6 +13,7 @@ void* ipc_create(int size)
   int fd;
   void *addr;
 
+  // memfd_create
   fd = shm_open(STORAGE_ID, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
   debug_assert(fd != -1, return NULL);
 

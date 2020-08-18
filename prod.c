@@ -18,6 +18,7 @@ void sig_handler(int sig)
 
 int main()
 {
+  printf("size: %d\n", sizeof(ring_queue));
   queue = (ring_queue*)ipc_create(sizeof(ring_queue));
   debug_assert(queue != NULL, return -1);
 
