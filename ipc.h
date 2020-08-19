@@ -1,3 +1,4 @@
+#pragma once
 #include <stdio.h>
 #include <sys/mman.h>
 #include <fcntl.h>
@@ -43,11 +44,15 @@ int ipc_destroy(void *addr, int size)
 
 void* ipc_open(int size)
 {
+  int res;
   int fd;
   void *addr;
 
   fd = shm_open(STORAGE_ID, O_RDWR, S_IRUSR | S_IWUSR);
   debug_assert(fd != -1, return NULL);
+
+  res = ftruncate(fd, size);
+  debug_assert(res == 0, return NULL);
 
   addr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
   debug_assert(addr != MAP_FAILED, return NULL);

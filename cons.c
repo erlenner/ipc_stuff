@@ -7,7 +7,6 @@
 
 ring_queue_def(int, 64) ring_queue;
 
-ring_queue* queue;
 int run = 1;
 
 void sig_handler(int sig)
@@ -18,7 +17,7 @@ void sig_handler(int sig)
 int main()
 {
   
-  queue = (ring_queue*)ipc_open(sizeof(ring_queue));
+  ring_queue* queue = (ring_queue*)ipc_open(sizeof(ring_queue));
   debug_assert(queue != NULL, return -1);
 
   signal(SIGINT, sig_handler);
