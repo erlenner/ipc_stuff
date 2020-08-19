@@ -8,7 +8,7 @@
 
 #define STORAGE_ID "/ipc_test"
 
-void* ipc_create(int size)
+static inline void* ipc_create(int size)
 {
   int res;
   int fd;
@@ -27,7 +27,7 @@ void* ipc_create(int size)
   return addr;
 }
 
-int ipc_destroy(void *addr, int size)
+static inline int ipc_destroy(void *addr, int size)
 {
   int res;
 
@@ -42,7 +42,7 @@ int ipc_destroy(void *addr, int size)
   return 0;
 }
 
-void* ipc_open(int size)
+static inline void* ipc_open(int size)
 {
   int res;
   int fd;
@@ -60,7 +60,7 @@ void* ipc_open(int size)
   return addr;
 }
 
-int ipc_unmap(void *addr, int size)
+static inline int ipc_unmap(void *addr, int size)
 {
   int res;
 

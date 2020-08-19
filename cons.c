@@ -32,7 +32,7 @@ int main()
       printf("%d ", entry);
 
       static int last_entry = -1;
-      debug_assert((entry == last_entry + 1) || (err) || (last_entry == -1), return -1);
+      debug_assert_v((entry == last_entry + 1) || (err) || (last_entry == -1), "non-monotonic: %d != %d + 1. ", entry, last_entry);
       last_entry = entry;
     }
     while (err == 0 && run);
