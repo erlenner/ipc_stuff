@@ -5,10 +5,8 @@
 #include "ipc.h"
 #include "debug.h"
 
-#define RING_SIZE 64
-ring_queue_def(int, RING_SIZE) ring_queue;
+ring_queue_def(int, 64) ring_queue;
 
-ring_queue* queue;
 int run = 1;
 
 void sig_handler(int sig)
@@ -18,15 +16,9 @@ void sig_handler(int sig)
 
 int main()
 {
-  printf("size: %d\n", sizeof(ring_queue));
-  queue = (ring_queue*)ipc_create(sizeof(ring_queue));
+  ring_queue* queue = (ring_queue*)ipc_create(sizeof(ring_queue));
   debug_assert(queue != NULL, return -1);
-
-  {
-    // initialize struct
-    ring_queue tmp = ring_queue_inst(int, RING_SIZE);
-    memcpy(queue, &tmp, sizeof(ring_queue));
-  }
+  ring_queue_init(queue);
 
   signal(SIGINT, sig_handler);
 

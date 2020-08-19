@@ -7,20 +7,21 @@
 _Static_assert((SIZE & (SIZE - 1)) == 0, "SIZE not binary exponent (2^n)"); \
 typedef struct                                                              \
 {                                                                           \
-  const int size;                                                           \
   int read_index;                                                           \
-  char padding[CACHELINE_BYTES - 2*sizeof(int)];                            \
+  char padding[CACHELINE_BYTES - sizeof(int)];                              \
   int write_index;                                                          \
   STORAGE buffer[SIZE];                                                     \
 } __attribute__ ((aligned(CACHELINE_BYTES)))
 
-#define ring_queue_inst(STORAGE, SIZE)  \
-{                                       \
-  .size=SIZE,                           \
-  .read_index=0,                        \
-  .write_index=0,                       \
-  .buffer = {},                         \
-}
+
+#define ring_queue_size(queue) (sizeof((queue)->buffer) / sizeof((queue)->buffer[0]))
+
+#define ring_queue_init(queue)  \
+do {                            \
+  (queue)->read_index = 0;      \
+  (queue)->write_index = 0;     \
+} while (0)
+
 
 // OPT_set(var) : var = 1;
 // OPT_set() : ;
@@ -29,13 +30,11 @@ typedef struct                                                              \
 
 #define next_index(index, size) (((index) + 1) & ((size)-1))
 
-#define prev_index(index, size) (((index) - 1) & ((size)-1))
-
 //                                   error
 #define ring_queue_push(queue, entry, ...)                              \
 do {                                                                    \
   int wi = __atomic_load_n(&(queue)->write_index, __ATOMIC_RELAXED);    \
-  wi = next_index(wi, (queue)->size);                                   \
+  wi = next_index(wi, ring_queue_size(queue));                          \
                                                                         \
   if (wi == __atomic_load_n(&(queue)->read_index, __ATOMIC_ACQUIRE))    \
     OPT_SET(1, __VA_ARGS__)                                             \
@@ -57,7 +56,7 @@ do {                                                                        \
     OPT_SET(1, __VA_ARGS__)                                                 \
   else                                                                      \
   {                                                                         \
-    ri = next_index(ri, (queue)->size);                                     \
+    ri = next_index(ri, ring_queue_size(queue));                            \
     entry = (queue)->buffer[ri];                                            \
     __atomic_store_n(&(queue)->read_index, ri, __ATOMIC_RELEASE);           \
     OPT_SET(0, __VA_ARGS__)                                                 \

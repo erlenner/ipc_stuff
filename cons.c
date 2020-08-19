@@ -5,8 +5,7 @@
 #include "ipc.h"
 #include "debug.h"
 
-#define RING_SIZE 64
-ring_queue_def(int, RING_SIZE) ring_queue;
+ring_queue_def(int, 64) ring_queue;
 
 ring_queue* queue;
 int run = 1;
