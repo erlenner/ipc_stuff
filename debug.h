@@ -10,4 +10,6 @@
 
 #define debug_assert(cond, ...) { if (!(cond)) { error("[%s\tline %5d] ", __FILE__, __LINE__); error("%s\n", strerror(errno)); __VA_ARGS__; } }
 
+#define debug_assert_v(cond, ...) { if (!(cond)) { error("[%s\tline %5d] ", __FILE__, __LINE__); error(__VA_ARGS__); error("%s\n", strerror(errno)); } }
+
 #define debug_abort(...) { assert_v(false, __VA_ARGS__); }

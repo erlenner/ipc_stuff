@@ -1,6 +1,7 @@
 *.swp
 *.swo
 *.o
+*.s
 run*
 *docker*
 build

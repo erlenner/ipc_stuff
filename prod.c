@@ -18,7 +18,8 @@ int main()
 {
   ring_queue* queue = (ring_queue*)ipc_create(sizeof(ring_queue));
   debug_assert(queue != NULL, return -1);
-  ring_queue_init(queue);
+  //ring_queue_init(queue);
+  debug_assert((queue->read_index == 0) && (queue->write_index == 0), return -1);
 
   signal(SIGINT, sig_handler);
 
@@ -26,8 +27,8 @@ int main()
   {
     static int entry=0;
     int err;
-    ring_queue_push(queue, entry++, err);
-    debug_assert(err == 0);
+    ring_queue_push(queue, entry, err);
+    debug_assert_v((err == 0) && ++entry, "entry: %d ", entry);
     usleep(3 * 1000);
   }
 
