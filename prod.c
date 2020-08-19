@@ -32,6 +32,8 @@ int main()
     usleep(3 * 1000);
   }
 
+  debug("read_index: %d write_index: %d\n", queue->read_index, queue->write_index);
+
   ipc_unmap((void*)queue, sizeof(ring_queue));
 
   return 0;
