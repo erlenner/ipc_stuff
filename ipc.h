@@ -6,16 +6,14 @@
 
 #include "debug.h"
 
-#define STORAGE_ID "/ipc_test"
-
-static inline void* ipc_create(int size)
+static inline void* ipc_create(const char* storage_id, int size)
 {
   int res;
   int fd;
   void *addr;
 
   // memfd_create
-  fd = shm_open(STORAGE_ID, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+  fd = shm_open(storage_id, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
   debug_assert(fd != -1, return NULL);
 
   res = ftruncate(fd, size);
@@ -27,28 +25,24 @@ static inline void* ipc_create(int size)
   return addr;
 }
 
-static inline int ipc_destroy(void *addr, int size)
+static inline int ipc_destroy(const char* storage_id, int size)
 {
   int res;
 
-  // mmap cleanup
-  res = munmap(addr, size);
-  debug_assert(res == 0, return -1);
-
   // shm_open cleanup
-  res = shm_unlink(STORAGE_ID);
+  res = shm_unlink(storage_id);
   debug_assert(res == 0, return -1);
 
   return 0;
 }
 
-static inline void* ipc_open(int size)
+static inline void* ipc_open(const char* storage_id, int size)
 {
   int res;
   int fd;
   void *addr;
 
-  fd = shm_open(STORAGE_ID, O_RDWR, S_IRUSR | S_IWUSR);
+  fd = shm_open(storage_id, O_RDWR, S_IRUSR | S_IWUSR);
   debug_assert(fd != -1, return NULL);
 
   res = ftruncate(fd, size);

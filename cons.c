@@ -16,8 +16,7 @@ void sig_handler(int sig)
 
 int main()
 {
-  
-  ring_queue* queue = (ring_queue*)ipc_open(sizeof(ring_queue));
+  ring_queue* queue = (ring_queue*)ipc_open("/ipc_test", sizeof(ring_queue));
   debug_assert(queue != NULL, return -1);
 
   debug("read_index: %d write_index: %d\n", queue->read_index, queue->write_index);
