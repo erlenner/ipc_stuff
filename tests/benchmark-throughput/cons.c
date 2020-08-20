@@ -24,22 +24,21 @@ int main()
   signal(SIGINT, sig_handler);
 
   int entry;
-
   while (run)
   {
     int err;
     do
     {
       ring_queue_eat(queue, entry, err);
-      printf("%d ", entry);
+      //printf("%d ", entry);
 
-      static int last_entry = -1;
-      debug_assert_v((entry == last_entry + 1) || (err) || (last_entry == -1), "non-monotonic: %d != %d + 1. ", entry, last_entry);
-      last_entry = entry;
+      //static int last_entry = -1;
+      //debug_assert_v((entry == last_entry + 1) || (err) || (last_entry == -1), "non-monotonic: %d != %d + 1. ", entry, last_entry);
+      //last_entry = entry;
     }
     while (err == 0 && run);
-    printf("\n");
-    usleep(30 * 1000);
+    //printf("\n");
+    //usleep(30 * 1000);
   }
 
   debug("read_index: %d write_index: %d entry: %d\n", queue->read_index, queue->write_index, entry);
