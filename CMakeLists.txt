@@ -6,7 +6,7 @@ project (icp_demo)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
 
 set(EXAMPLE "examples/ring_queue_demo")
-include_directories(.)
+include_directories(include)
 
 add_executable(icpprod ${EXAMPLE}/prod.c)
 target_link_libraries(icpprod -lrt)

@@ -1,5 +1,5 @@
 
-IPC_DIR=../..
+IPC_DIR=../../include
 
 .PHONY: all
 all: runprod runcons
