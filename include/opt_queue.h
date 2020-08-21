@@ -47,8 +47,7 @@ do {                                                                        \
   int wi = __atomic_load_n(&(q)->write_index, __ATOMIC_RELAXED);            \
   wi = next_index(wi, opt_queue_size(q));                                   \
                                                                             \
-  /*(q)->buffer[wi] = {.seq = 0, .entry = e};*/                             \
-  int seq = __atomic_load_n(&(q)->buffer[wi].seq, __ATOMIC_ACQUIRE);        \
+  static int seq = 0;                                                       \
   __atomic_store_n(&(q)->buffer[wi].seq, ++seq, __ATOMIC_RELEASE);          \
   (q)->buffer[wi].entry = e;                                                \
   __atomic_store_n(&(q)->buffer[wi].seq, ++seq, __ATOMIC_RELEASE);          \
@@ -63,6 +62,8 @@ do {                                                                        \
                                                                             \
   while(1)                                                                  \
   {                                                                         \
+    /*static int total = 0;*/                                               \
+    /*++total;*/                                                            \
     const int wi = __atomic_load_n(&(q)->write_index, __ATOMIC_ACQUIRE);    \
     int seq = __atomic_load_n(&(q)->buffer[wi].seq, __ATOMIC_ACQUIRE);      \
     if (seq & 1)                                                            \
@@ -77,7 +78,7 @@ do {                                                                        \
     if (seq2 == seq)                                                        \
       break;                                                                \
     /*static int fail = 0;*/                                                \
-    /*fprintf(stderr, "\nFAILED: %d %d %f\n", ++fail, _entry, (_entry > 0) ? ((float)fail / (float)_entry) : 0);*/ \
+    /*fprintf(stderr, "\nFAILED: %d %d %f\n", ++fail, total, (total > 0) ? ((float)fail / (float)total) : 0);*/ \
   }                                                                         \
                                                                             \
   _entry = e;                                                               \
