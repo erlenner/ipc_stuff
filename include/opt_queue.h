@@ -3,6 +3,8 @@ Optimistic Queue
 
 Inspired by:
 http://www.1024cores.net/home/lock-free-algorithms/reader-writer-problem/improved-lock-free-seqlock
+https://github.com/torvalds/linux/blob/master/include/vdso/helpers.h
+https://github.com/rigtorp/Seqlock
 */
 
 #pragma once
@@ -13,6 +15,10 @@ http://www.1024cores.net/home/lock-free-algorithms/reader-writer-problem/improve
 #define CACHELINE_BYTES MX6_CACHELINE_BYTES
 // L1: https://developer.arm.com/documentation/ddi0388/f/Level-1-Memory-System/About-the-L1-memory-system
 // L2: https://community.nxp.com/thread/510105
+
+// https://github.com/torvalds/linux/blob/master/arch/arm/include/asm/barrier.h
+//#define dmb(option) __asm__ __volatile__ ("dmb " #option : : : "memory")
+//dmb(ish);
 
 #define opt_queue_def(STORAGE, SIZE)\
 static_assert((SIZE & (SIZE - 1)) == 0, "SIZE not binary exponent (2^n)");  \
@@ -50,8 +56,11 @@ do {                                                                            
                                                                                     \
   static int seq = 0;                                                               \
   atomic_store_explicit(&(q)->buffer[wi].seq, ++seq, memory_order_release);         \
+  atomic_thread_fence(memory_order_acq_rel);                                        \
   (q)->buffer[wi].entry = e;                                                        \
+  atomic_thread_fence(memory_order_acq_rel);                                        \
   atomic_store_explicit(&(q)->buffer[wi].seq, ++seq, memory_order_release);         \
+                                                                                    \
   atomic_store_explicit(&(q)->write_index, wi, memory_order_release);               \
                                                                                     \
 } while(0)
@@ -73,7 +82,9 @@ do {                                                                            
       continue;                                                                     \
     }                                                                               \
                                                                                     \
+    atomic_thread_fence(memory_order_acq_rel);                                      \
     e = (q)->buffer[wi].entry;                                                      \
+    atomic_thread_fence(memory_order_acq_rel);                                      \
                                                                                     \
     int seq2 = atomic_load_explicit(&(q)->buffer[wi].seq, memory_order_acquire);    \
     if (seq2 == seq)                                                                \
