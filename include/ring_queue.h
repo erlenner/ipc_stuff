@@ -7,6 +7,7 @@ https://github.com/boostorg/lockfree/blob/develop/include/boost/lockfree/spsc_qu
 
 #pragma once
 #include <assert.h> // for static_assert
+#include <stdatomic.h>
 
 #define MX6_CACHELINE_BYTES 32
 #define CACHELINE_BYTES MX6_CACHELINE_BYTES
@@ -14,7 +15,7 @@ https://github.com/boostorg/lockfree/blob/develop/include/boost/lockfree/spsc_qu
 // L2: https://community.nxp.com/thread/510105
 
 #define ring_queue_def(STORAGE, SIZE)\
-static_assert((SIZE & (SIZE - 1)) == 0, "SIZE not binary exponent (2^n)"); \
+static_assert((SIZE & (SIZE - 1)) == 0, "SIZE not binary exponent (2^n)");  \
 typedef struct                                                              \
 {                                                                           \
   int read_index;                                                           \
@@ -40,60 +41,58 @@ do {                            \
 
 #define next_index(index, size) (((index) + 1) & ((size)-1))
 
-//                                   error
-#define ring_queue_push(_queue, _entry, ...)                                \
-do {                                                                        \
-  typeof(_queue) const q = _queue;                                          \
-  typeof(_entry) e = _entry;                                                \
-                                                                            \
-  int wi = __atomic_load_n(&(q)->write_index, __ATOMIC_RELAXED);            \
-  wi = next_index(wi, ring_queue_size(q));                                  \
-                                                                            \
-  if (wi == __atomic_load_n(&(q)->read_index, __ATOMIC_ACQUIRE))            \
-    OPT_SET(1, __VA_ARGS__)                                                 \
-  else                                                                      \
-  {                                                                         \
-    (q)->buffer[wi] = e;                                                    \
-    __atomic_store_n(&(q)->write_index, wi, __ATOMIC_RELEASE);              \
-    OPT_SET(0, __VA_ARGS__)                                                 \
-  }                                                                         \
-                                                                            \
+#define ring_queue_push(_queue, _entry, .../*error*/)                               \
+do {                                                                                \
+  typeof(_queue) const q = _queue;                                                  \
+  typeof(_entry) e = _entry;                                                        \
+                                                                                    \
+  int wi = atomic_load_explicit(&(q)->write_index, memory_order_relaxed);           \
+  wi = next_index(wi, ring_queue_size(q));                                          \
+                                                                                    \
+  if (wi == atomic_load_explicit(&(q)->read_index, memory_order_acquire))           \
+    OPT_SET(1, __VA_ARGS__)                                                         \
+  else                                                                              \
+  {                                                                                 \
+    (q)->buffer[wi] = e;                                                            \
+    atomic_store_explicit(&(q)->write_index, wi, memory_order_release);             \
+    OPT_SET(0, __VA_ARGS__)                                                         \
+  }                                                                                 \
+                                                                                    \
 } while(0)
 
-//                                  error
-#define ring_queue_eat(_queue, _entry, ...)                                 \
-do {                                                                        \
-  typeof(_queue) const q = _queue;                                          \
-  typeof(_entry) e = _entry;                                                \
-                                                                            \
-  const int wi = __atomic_load_n(&(q)->write_index, __ATOMIC_ACQUIRE);      \
-  int ri = __atomic_load_n(&(q)->read_index, __ATOMIC_RELAXED);             \
-                                                                            \
-  if (ri == wi)                                                             \
-    OPT_SET(1, __VA_ARGS__)                                                 \
-  else                                                                      \
-  {                                                                         \
-    ri = next_index(ri, ring_queue_size(q));                                \
-    e = (q)->buffer[ri];                                                    \
-    __atomic_store_n(&(q)->read_index, ri, __ATOMIC_RELEASE);               \
-    OPT_SET(0, __VA_ARGS__)                                                 \
-  }                                                                         \
-                                                                            \
-  _entry = e;                                                               \
+#define ring_queue_eat(_queue, _entry, .../*error*/)                                \
+do {                                                                                \
+  typeof(_queue) const q = _queue;                                                  \
+  typeof(_entry) e = _entry;                                                        \
+                                                                                    \
+  const int wi = atomic_load_explicit(&(q)->write_index, memory_order_acquire);     \
+  int ri = atomic_load_explicit(&(q)->read_index, memory_order_relaxed);            \
+                                                                                    \
+  if (ri == wi)                                                                     \
+    OPT_SET(1, __VA_ARGS__)                                                         \
+  else                                                                              \
+  {                                                                                 \
+    ri = next_index(ri, ring_queue_size(q));                                        \
+    e = (q)->buffer[ri];                                                            \
+    atomic_store_explicit(&(q)->read_index, ri, memory_order_release);              \
+    OPT_SET(0, __VA_ARGS__)                                                         \
+  }                                                                                 \
+                                                                                    \
+  _entry = e;                                                                       \
 } while(0)
 
-#define ring_queue_eat_last(queue, entry, ...)                              \
-do {                                                                        \
-  const int wi = __atomic_load_n(&(queue)->write_index, __ATOMIC_ACQUIRE);  \
-  int ri = __atomic_load_n(&(queue)->read_index, __ATOMIC_RELAXED);         \
-                                                                            \
-  if (ri == wi)                                                             \
-    OPT_SET(1, __VA_ARGS__)                                                 \
-  else                                                                      \
-  {                                                                         \
-    ri = wi;                                                                \
-    entry = (queue)->buffer[ri];                                            \
-    __atomic_store_n(&(queue)->read_index, ri, __ATOMIC_RELEASE);           \
-    OPT_SET(0, __VA_ARGS__)                                                 \
-  }                                                                         \
+#define ring_queue_eat_last(queue, entry, ...)                                      \
+do {                                                                                \
+  const int wi = atomic_load_explicit(&(queue)->write_index, memory_order_acquire); \
+  int ri = atomic_load_explicit(&(queue)->read_index, memory_order_relaxed);        \
+                                                                                    \
+  if (ri == wi)                                                                     \
+    OPT_SET(1, __VA_ARGS__)                                                         \
+  else                                                                              \
+  {                                                                                 \
+    ri = wi;                                                                        \
+    entry = (queue)->buffer[ri];                                                    \
+    atomic_store_explicit(&(queue)->read_index, ri, memory_order_release);          \
+    OPT_SET(0, __VA_ARGS__)                                                         \
+  }                                                                                 \
 } while(0)

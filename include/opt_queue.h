@@ -7,6 +7,7 @@ http://www.1024cores.net/home/lock-free-algorithms/reader-writer-problem/improve
 
 #pragma once
 #include <assert.h> // for static_assert
+#include <stdatomic.h>
 
 #define MX6_CACHELINE_BYTES 32
 #define CACHELINE_BYTES MX6_CACHELINE_BYTES
@@ -39,49 +40,49 @@ do {                                                            \
 
 #define next_index(index, size) (((index) + 1) & ((size)-1))
 
-#define opt_queue_write(_queue, _entry)                                     \
-do {                                                                        \
-  typeof(_queue) const q = _queue;                                          \
-  typeof(_entry) e = _entry;                                                \
-                                                                            \
-  int wi = __atomic_load_n(&(q)->write_index, __ATOMIC_RELAXED);            \
-  wi = next_index(wi, opt_queue_size(q));                                   \
-                                                                            \
-  static int seq = 0;                                                       \
-  __atomic_store_n(&(q)->buffer[wi].seq, ++seq, __ATOMIC_RELEASE);          \
-  (q)->buffer[wi].entry = e;                                                \
-  __atomic_store_n(&(q)->buffer[wi].seq, ++seq, __ATOMIC_RELEASE);          \
-  __atomic_store_n(&(q)->write_index, wi, __ATOMIC_RELEASE);                \
-                                                                            \
+#define opt_queue_write(_queue, _entry)                                             \
+do {                                                                                \
+  typeof(_queue) const q = _queue;                                                  \
+  typeof(_entry) e = _entry;                                                        \
+                                                                                    \
+  int wi = atomic_load_explicit(&(q)->write_index, __ATOMIC_RELAXED);               \
+  wi = next_index(wi, opt_queue_size(q));                                           \
+                                                                                    \
+  static int seq = 0;                                                               \
+  atomic_store_explicit(&(q)->buffer[wi].seq, ++seq, memory_order_release);         \
+  (q)->buffer[wi].entry = e;                                                        \
+  atomic_store_explicit(&(q)->buffer[wi].seq, ++seq, memory_order_release);         \
+  atomic_store_explicit(&(q)->write_index, wi, memory_order_release);               \
+                                                                                    \
 } while(0)
 
-#define opt_queue_read(_queue, _entry)                                      \
-do {                                                                        \
-  typeof(_queue) const q = _queue;                                          \
-  typeof(_entry) e = _entry;                                                \
-                                                                            \
-  while(1)                                                                  \
-  {                                                                         \
-    /*static int total = 0;*/                                               \
-    /*++total;*/                                                            \
-    const int wi = __atomic_load_n(&(q)->write_index, __ATOMIC_ACQUIRE);    \
-    int seq = __atomic_load_n(&(q)->buffer[wi].seq, __ATOMIC_ACQUIRE);      \
-    if (seq & 1)                                                            \
-    {                                                                       \
-      fprintf(stderr, "V");                                                 \
-      continue;                                                             \
-    }                                                                       \
-                                                                            \
-    e = (q)->buffer[wi].entry;                                              \
-                                                                            \
-    int seq2 = __atomic_load_n(&(q)->buffer[wi].seq, __ATOMIC_ACQUIRE);     \
-    if (seq2 == seq)                                                        \
-      break;                                                                \
-    /*static int fail = 0;*/                                                \
+#define opt_queue_read(_queue, _entry)                                              \
+do {                                                                                \
+  typeof(_queue) const q = _queue;                                                  \
+  typeof(_entry) e = _entry;                                                        \
+                                                                                    \
+  while(1)                                                                          \
+  {                                                                                 \
+    /*static int total = 0;*/                                                       \
+    /*++total;*/                                                                    \
+    const int wi = atomic_load_explicit(&(q)->write_index, memory_order_acquire);   \
+    int seq = atomic_load_explicit(&(q)->buffer[wi].seq, memory_order_acquire);     \
+    if (seq & 1)                                                                    \
+    {                                                                               \
+      fprintf(stderr, "V");                                                         \
+      continue;                                                                     \
+    }                                                                               \
+                                                                                    \
+    e = (q)->buffer[wi].entry;                                                      \
+                                                                                    \
+    int seq2 = atomic_load_explicit(&(q)->buffer[wi].seq, memory_order_acquire);    \
+    if (seq2 == seq)                                                                \
+      break;                                                                        \
+    /*static int fail = 0;*/                                                        \
     /*fprintf(stderr, "\nFAILED: %d %d %f\n", ++fail, total, (total > 0) ? ((float)fail / (float)total) : 0);*/ \
-  }                                                                         \
-                                                                            \
-  _entry = e;                                                               \
-  /*fprintf(stderr, "i");*/                                                 \
-  /*printf("ok %d\n", _entry);*/                                            \
+  }                                                                                 \
+                                                                                    \
+  _entry = e;                                                                       \
+  /*fprintf(stderr, "i");*/                                                         \
+  /*printf("ok %d\n", _entry);*/                                                    \
 } while(0)
