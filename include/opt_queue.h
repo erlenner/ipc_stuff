@@ -35,42 +35,6 @@ https://github.com/rigtorp/Seqlock
 #define smp_rmb() barrier()
 #endif
 
-//#define __scalar_type_to_expr_cases(type)       \
-//    unsigned type:  (unsigned type)0,     \
-//    signed type:  (signed type)0
-//
-//#define __unqual_scalar_typeof(x) typeof(       \
-//    _Generic((x),           \
-//       char:  (char)0,        \
-//       __scalar_type_to_expr_cases(char),   \
-//       __scalar_type_to_expr_cases(short),    \
-//       __scalar_type_to_expr_cases(int),    \
-//       __scalar_type_to_expr_cases(long),   \
-//       __scalar_type_to_expr_cases(long long),  \
-//       default: (x)))
-//
-//#define compiletime_assert_rwonce_type(t)         \
-//  static_assert((sizeof(t) == sizeof(int)) || (sizeof(t) == sizeof(long)) || (sizeof(t) == sizeof(long long)),  \
-//    "Unsupported access size for {READ,WRITE}_ONCE().")
-//#define ACCESS_ONCE(x) (*(volatile typeof(x) *)&(x))
-//#ifndef __READ_ONCE
-//#define __READ_ONCE(x)  (*(const volatile __unqual_scalar_typeof(x) *)&(x))
-//#endif
-//#define READ_ONCE(x)              \
-//({                  \
-//  compiletime_assert_rwonce_type(x);        \
-//  __READ_ONCE(x);             \
-//})
-//#define __WRITE_ONCE(x, val)            \
-//do {                  \
-//  *(volatile typeof(x) *)&(x) = (val);        \
-//} while (0)
-//#define WRITE_ONCE(x, val)            \
-//do {                  \
-//  compiletime_assert_rwonce_type(x);        \
-//  __WRITE_ONCE(x, val);           \
-//} while (0)
-
 #define opt_queue_def(STORAGE, SIZE)\
 static_assert((SIZE & (SIZE - 1)) == 0, "SIZE not binary exponent (2^n)");  \
 typedef struct                                                              \
@@ -128,13 +92,13 @@ do {                                                                            
     int seq = atomic_load_explicit(&(q)->buffer[wi].seq, memory_order_relaxed);     \
     if (seq & 1)                                                                    \
     {                                                                               \
-      fprintf(stderr, "V");                                                         \
+      /*fprintf(stderr, "V");*/                                                     \
       continue;                                                                     \
     }                                                                               \
                                                                                     \
-    smp_rmb();                                                                       \
+    smp_rmb();                                                                      \
     e = (q)->buffer[wi].entry;                                                      \
-    smp_rmb();                                                                       \
+    smp_rmb();                                                                      \
                                                                                     \
     int seq2 = atomic_load_explicit(&(q)->buffer[wi].seq, memory_order_relaxed);    \
     if (seq2 == seq)                                                                \
