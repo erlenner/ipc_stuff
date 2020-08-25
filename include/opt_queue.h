@@ -17,12 +17,17 @@ https://github.com/rigtorp/Seqlock
 // L2: https://community.nxp.com/thread/510105
 
 
+//#define smp_mb() atomic_thread_fence(memory_order_acq_rel);                                         \
+//#define smp_wmb() smp_mb()                                                                          \
+//#define smp_rmb() smp_mb()                                                                          \
+
 #if __arm__
 // https://github.com/torvalds/linux/blob/master/arch/arm/include/asm/barrier.h
 #define dmb(option) __asm__ __volatile__ ("dmb " #option : : : "memory")
 #define smp_mb() dmb(ish);
 #define smp_wmb() dmb(ishst);
 #define smp_rmb() smp_mb()
+//#define smp_rmb() dmb(ishld); // armv8
 #elif __x86_64__
 #define barrier() __asm__ __volatile__("": : :"memory")
 #define smp_mb() barrier()
@@ -127,9 +132,9 @@ do {                                                                            
       continue;                                                                     \
     }                                                                               \
                                                                                     \
-    smp_mb();                                                                       \
+    smp_rmb();                                                                       \
     e = (q)->buffer[wi].entry;                                                      \
-    smp_mb();                                                                       \
+    smp_rmb();                                                                       \
                                                                                     \
     int seq2 = atomic_load_explicit(&(q)->buffer[wi].seq, memory_order_relaxed);    \
     if (seq2 == seq)                                                                \
