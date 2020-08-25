@@ -69,11 +69,11 @@ do {                                                                            
   wi = next_index(wi, opt_queue_size(q));                                           \
                                                                                     \
   static int seq = 0;                                                               \
-  atomic_store_explicit(&(q)->buffer[wi].seq, ++seq, memory_order_relaxed);         \
+  (q)->buffer[wi].seq = ++seq;                                                      \
   smp_wmb();                                                                        \
   (q)->buffer[wi].entry = e;                                                        \
   smp_wmb();                                                                        \
-  atomic_store_explicit(&(q)->buffer[wi].seq, ++seq, memory_order_relaxed);         \
+  (q)->buffer[wi].seq = ++seq;                                                      \
                                                                                     \
   atomic_store_explicit(&(q)->write_index, wi, memory_order_release);               \
                                                                                     \
@@ -89,7 +89,7 @@ do {                                                                            
     /*static int total = 0;*/                                                       \
     /*++total;*/                                                                    \
     const int wi = atomic_load_explicit(&(q)->write_index, memory_order_acquire);   \
-    int seq = atomic_load_explicit(&(q)->buffer[wi].seq, memory_order_relaxed);     \
+    int seq = (q)->buffer[wi].seq;                                                  \
     if (seq & 1)                                                                    \
     {                                                                               \
       /*fprintf(stderr, "V");*/                                                     \
@@ -100,7 +100,7 @@ do {                                                                            
     e = (q)->buffer[wi].entry;                                                      \
     smp_rmb();                                                                      \
                                                                                     \
-    int seq2 = atomic_load_explicit(&(q)->buffer[wi].seq, memory_order_relaxed);    \
+    int seq2 = (q)->buffer[wi].seq;                                                 \
     if (seq2 == seq)                                                                \
       break;                                                                        \
     /*static int fail = 0;*/                                                        \
