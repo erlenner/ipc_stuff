@@ -96,7 +96,7 @@ do {                                                                            
   typeof(_queue) const q = _queue;                                                  \
   typeof(_entry) e = _entry;                                                        \
                                                                                     \
-  int wi = atomic_load_explicit(&(q)->write_index, __ATOMIC_RELAXED);               \
+  int wi = atomic_load_explicit(&(q)->write_index, memory_order_acquire);           \
   wi = next_index(wi, opt_queue_size(q));                                           \
                                                                                     \
   static int seq = 0;                                                               \
