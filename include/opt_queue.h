@@ -54,7 +54,7 @@ typedef struct                                                              \
 
 #define opt_queue_init(queue)                                   \
 do {                                                            \
-  (queue)->write_index = 0;                                     \
+  memset(queue, 0, sizeof(queue));                              \
 } while (0)
 
 
@@ -68,12 +68,11 @@ do {                                                                            
   int wi = atomic_load_explicit(&(q)->write_index, memory_order_acquire);           \
   wi = next_index(wi, opt_queue_size(q));                                           \
                                                                                     \
-  static int seq = 0;                                                               \
-  (q)->buffer[wi].seq = ++seq;                                                      \
+  ++((q)->buffer[wi].seq);                                                          \
   smp_wmb();                                                                        \
   (q)->buffer[wi].entry = e;                                                        \
   smp_wmb();                                                                        \
-  (q)->buffer[wi].seq = ++seq;                                                      \
+  ++((q)->buffer[wi].seq);                                                          \
                                                                                     \
   atomic_store_explicit(&(q)->write_index, wi, memory_order_release);               \
                                                                                     \
