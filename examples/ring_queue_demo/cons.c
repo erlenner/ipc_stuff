@@ -35,26 +35,24 @@ int main()
     do
     {
       ring_queue_eat(queue, entry, err);
-      my_struct_print(printf, entry, "\n");
+      //my_struct_print(printf, entry, "\n");
 
       if (err == 0)
       {
         for (int i=0; i<50; ++i)
         {
-          #define datai entry.data[i]
-          #define last_datai last_entry.data[i]
-          debug_assert_v(datai.ii == last_datai.ii + 1, "non-monotonic: %d != %d + 1. ", datai.ii, last_datai.ii);
-          debug_assert_v(datai.l == last_datai.l + 1, "non-monotonic: %d != %d + 1. ", datai.l, last_datai.l);
-          debug_assert_v(datai.ll == last_datai.ll + 1, "non-monotonic: %d != %d + 1. ", datai.ll, last_datai.ll);
-          #undef last_datai
-          #undef datai
+          #define assert_monotonic(value, last_value) debug_assert_v(value == last_value + 1, "non-monotonic: %d != %d + 1. ", value, last_value)
+          assert_monotonic(entry.data[i].ii, last_entry.data[i].ii);
+          assert_monotonic(entry.data[i].l, last_entry.data[i].l);
+          assert_monotonic(entry.data[i].ll, last_entry.data[i].ll);
+          #undef assert_monotonic
         }
       }
       last_entry = entry;
     }
     while (err == 0 && run);
-    printf("\n");
-    usleep(30 * 1000);
+    //printf("\n");
+    //usleep(30 * 1000);
   }
 
   debug("read_index: %d write_index: %d entry: %d\n", queue->read_index, queue->write_index, entry);

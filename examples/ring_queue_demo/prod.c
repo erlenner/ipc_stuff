@@ -32,7 +32,7 @@ int main()
 
     int err;
     ring_queue_push(queue, entry, err);
-    debug_assert_v((err == 0), "entry: %d ", entry);
+    debug_assert_v((err == 0), "entry: %u\tri: %d\twi: %d ", entry.data[0].ii, queue->read_index, queue->write_index);
     if (err == 0)
     {
       for (int i=0; i<50; ++i)
@@ -42,7 +42,8 @@ int main()
         ++(entry.data[i].ll);
       }
     }
-    usleep(3 * 1000);
+    else
+      usleep(3 * 1000);
   }
 
   debug("read_index: %d write_index: %d\n", queue->read_index, queue->write_index);
