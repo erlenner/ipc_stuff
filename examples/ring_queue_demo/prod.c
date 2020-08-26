@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <signal.h>
+#include <stdlib.h>
+#include <time.h>
 
 #include "ring_queue.h"
 #include "ipc.h"
@@ -27,6 +29,8 @@ int main()
   my_struct entry;
   memset(&entry, 0, sizeof(entry));
 
+  srand(time(NULL));
+
   while (run)
   {
 
@@ -42,8 +46,9 @@ int main()
         ++(entry.data[i].ll);
       }
     }
-    else
-      usleep(3 * 1000);
+    //else
+    //  usleep(3 * 1000);
+    if ((rand() % 1000) == 0) usleep((rand() % 10) * 1000);
   }
 
   debug("read_index: %d write_index: %d\n", queue->read_index, queue->write_index);
