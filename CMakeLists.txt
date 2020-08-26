@@ -18,6 +18,14 @@ target_link_libraries(ring_queue_cons -lrt)
 install(TARGETS ring_queue_cons DESTINATION bin)
 
 
+add_executable(ring_queue_cache_prod examples/ring_queue_cache_demo/prod.c)
+target_link_libraries(ring_queue_cache_prod -lrt)
+install(TARGETS ring_queue_cache_prod DESTINATION bin)
+
+add_executable(ring_queue_cache_cons examples/ring_queue_cache_demo/cons.c)
+target_link_libraries(ring_queue_cache_cons -lrt)
+install(TARGETS ring_queue_cache_cons DESTINATION bin)
+
 
 add_executable(opt_queue_prod examples/opt_queue_demo/prod.c)
 target_link_libraries(opt_queue_prod -lrt)
