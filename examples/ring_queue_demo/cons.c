@@ -5,7 +5,9 @@
 #include "ipc.h"
 #include "debug.h"
 
-ring_queue_def(int, 64) ring_queue;
+#include "my_struct.h"
+
+ring_queue_def(my_struct, 64) ring_queue;
 
 int run = 1;
 
@@ -23,7 +25,9 @@ int main()
 
   signal(SIGINT, sig_handler);
 
-  int entry;
+  my_struct entry, last_entry;
+  memset(&entry, 0, sizeof(entry));
+  memset(&last_entry, 0, sizeof(last_entry));
 
   while (run)
   {
@@ -31,10 +35,21 @@ int main()
     do
     {
       ring_queue_eat(queue, entry, err);
-      printf("%d ", entry);
+      my_struct_print(printf, entry, "\n");
 
-      static int last_entry = -1;
-      debug_assert_v((entry == last_entry + 1) || (err) || (last_entry == -1), "non-monotonic: %d != %d + 1. ", entry, last_entry);
+      if (err == 0)
+      {
+        for (int i=0; i<50; ++i)
+        {
+          #define datai entry.data[i]
+          #define last_datai last_entry.data[i]
+          debug_assert_v(datai.ii == last_datai.ii + 1, "non-monotonic: %d != %d + 1. ", datai.ii, last_datai.ii);
+          debug_assert_v(datai.l == last_datai.l + 1, "non-monotonic: %d != %d + 1. ", datai.l, last_datai.l);
+          debug_assert_v(datai.ll == last_datai.ll + 1, "non-monotonic: %d != %d + 1. ", datai.ll, last_datai.ll);
+          #undef last_datai
+          #undef datai
+        }
+      }
       last_entry = entry;
     }
     while (err == 0 && run);

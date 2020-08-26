@@ -5,7 +5,9 @@
 #include "ipc.h"
 #include "debug.h"
 
-ring_queue_def(int, 64) ring_queue;
+#include "my_struct.h"
+
+ring_queue_def(my_struct, 64) ring_queue;
 
 int run = 1;
 
@@ -22,12 +24,24 @@ int main()
 
   signal(SIGINT, sig_handler);
 
+  my_struct entry;
+  memset(&entry, 0, sizeof(entry));
+
   while (run)
   {
-    static int entry=0;
+
     int err;
     ring_queue_push(queue, entry, err);
-    debug_assert_v((err == 0) && ++entry, "entry: %d ", entry);
+    debug_assert_v((err == 0), "entry: %d ", entry);
+    if (err == 0)
+    {
+      for (int i=0; i<50; ++i)
+      {
+        ++(entry.data[i].ii);
+        ++(entry.data[i].l);
+        ++(entry.data[i].ll);
+      }
+    }
     usleep(3 * 1000);
   }
 
