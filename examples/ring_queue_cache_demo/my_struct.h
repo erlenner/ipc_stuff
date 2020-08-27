@@ -3,12 +3,18 @@ typedef struct
 {
   struct
   {
-    unsigned int ii;
+    int ii;
+
     char c;
-    unsigned long l;
-    char cc;
-    unsigned long long ll;
+    char p1[23];
+
+    int iii;
+
+    char p2[54];
+
+    int iiii;
+
   } data[50];
 } my_struct;
 
-#define my_struct_print(print, s, ...) print("%u\t%lu\t%llu" __VA_ARGS__ , s.data[0].ii, s.data[0].l, s.data[0].ll)
+#define my_struct_print(print, s, ...) print("%d\t%d\t%d" __VA_ARGS__ , s.data[0].ii, s.data[0].iii, s.data[0].iiii)

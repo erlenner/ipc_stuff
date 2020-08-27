@@ -5,10 +5,10 @@ IPC_DIR=../../include
 all: runprod runcons
 
 runprod: prod.c ${IPC_DIR}/opt_queue.h ${IPC_DIR}/ipc.h ${IPC_DIR}/debug.h
-	gcc -Wall -O2 -Wall -Wno-format -I${IPC_DIR} -o runprod prod.c -lrt
+	gcc -Wall -O2 -Wall -I${IPC_DIR} -o runprod prod.c -lrt
 
 runcons: cons.c ${IPC_DIR}/opt_queue.h ${IPC_DIR}/ipc.h ${IPC_DIR}/debug.h
-	gcc -Wall -O2 -Wall -Wno-format -I${IPC_DIR} -o runcons cons.c -lrt
+	gcc -Wall -O2 -Wall -I${IPC_DIR} -o runcons cons.c -lrt
 
 .PHONY: clean
 clean:

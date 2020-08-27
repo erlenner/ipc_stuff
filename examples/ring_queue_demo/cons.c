@@ -47,8 +47,8 @@ int main()
         {
           #define assert_monotonic(value, last_value) debug_assert_v(value == last_value + 1, "non-monotonic: %d != %d + 1. ", value, last_value)
           assert_monotonic(entry.data[i].ii, last_entry.data[i].ii);
-          assert_monotonic(entry.data[i].l, last_entry.data[i].l);
-          assert_monotonic(entry.data[i].ll, last_entry.data[i].ll);
+          assert_monotonic(entry.data[i].iii, last_entry.data[i].iii);
+          assert_monotonic(entry.data[i].iiii, last_entry.data[i].iiii);
           #undef assert_monotonic
         }
       }

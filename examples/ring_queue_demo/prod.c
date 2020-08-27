@@ -36,14 +36,14 @@ int main()
 
     int err;
     ring_queue_push(queue, entry, err);
-    debug_assert_v((err == 0), "entry: %u\tri: %d\twi: %d ", entry.data[0].ii, queue->read_index, queue->write_index);
+    debug_assert_v((err == 0), "entry: %d\tri: %d\twi: %d ", entry.data[0].ii, queue->read_index, queue->write_index);
     if (err == 0)
     {
       for (int i=0; i<50; ++i)
       {
         ++(entry.data[i].ii);
-        ++(entry.data[i].l);
-        ++(entry.data[i].ll);
+        ++(entry.data[i].iii);
+        ++(entry.data[i].iiii);
       }
     }
     //else
