@@ -21,13 +21,24 @@ int main()
 
   signal(SIGINT, sig_handler);
 
-  int entry;
 
   while (run)
   {
-    opt_queue_read(queue, entry);
+    int entry;
+    static int last_entry = 0;
 
-    printf("%d\n", entry);
+    static int last_seq = 0;
+    int seq = 0;
+
+    opt_queue_read(queue, entry, seq);
+
+    if (seq != last_seq)
+    {
+      printf("%d\n", entry);
+      debug_assert_v(entry != last_entry, "equal: %d == %d. ", entry, last_entry);
+      last_entry = entry;
+      last_seq = seq;
+    }
 
     //usleep(3 * 1000);
   }
