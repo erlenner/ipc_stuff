@@ -5,7 +5,7 @@
 #include "ipc.h"
 #include "debug.h"
 
-opt_queue_def(int, 64) opt_queue;
+#include "my_struct.h"
 
 int run = 1;
 
@@ -16,6 +16,7 @@ void sig_handler(int sig)
 
 int main()
 {
+  opt_queue_def(my_struct, 64) opt_queue;
   opt_queue* queue = (opt_queue*)ipc_open("/ipc_test", sizeof(opt_queue));
   debug_assert(queue != NULL, return -1);
 
@@ -24,8 +25,9 @@ int main()
 
   while (run)
   {
-    int entry;
-    static int last_entry = 0;
+    my_struct entry;
+    static my_struct last_entry;
+    memset(&last_entry, 0, sizeof(last_entry));
 
     static int last_seq = 0;
     int seq = 0;
@@ -34,8 +36,21 @@ int main()
 
     if (seq != last_seq)
     {
-      printf("%d\n", entry);
-      debug_assert_v(entry != last_entry, "equal: %d == %d. ", entry, last_entry);
+      my_struct_print(printf, entry, "\n");
+
+      for (int i=0; i < 50; ++i)
+      {
+        #define assert_nonequal(value, last_value) debug_assert_v(value != last_value, "equal: %d == %d. ", value, last_value)
+        assert_nonequal(entry.data[i].ii, last_entry.data[i].ii);
+        assert_nonequal(entry.data[i].iii, last_entry.data[i].iii);
+        assert_nonequal(entry.data[i].iiii, last_entry.data[i].iiii);
+        #undef assert_nonequal
+
+        #define assert_equal(value, last_value) debug_assert_v(value == last_value, "not equal: %d != %d. ", value, last_value)
+        assert_equal(entry.data[i].ii, entry.data[i].iii);
+        assert_equal(entry.data[i].ii, entry.data[i].iiii);
+        #undef assert_equal
+      }
       last_entry = entry;
       last_seq = seq;
     }
