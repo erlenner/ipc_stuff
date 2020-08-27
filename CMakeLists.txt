@@ -3,7 +3,7 @@ cmake_minimum_required (VERSION 3.5.1)
 project (icp_demo)
 
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -Wall -Wno-format")
 
 include_directories(include)
 
