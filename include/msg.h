@@ -9,8 +9,8 @@
 #define MSG_NO_EVAL_VERIFY(...) \
     IF ( IS_LIST_NOT_EMPTY( __VA_ARGS__ )  ) \
     ( \
-        static_assert(sizeof(STRINGIFY(HEAD1(__VA_ARGS__))) < NAME_SIZE, "field name too large: sizeof(" STRINGIFY(HEAD1(__VA_ARGS__)) ") > " STRINGIFY(NAME_SIZE) ); \
-        DEFER2 ( MSG_INDIRECT_VERIFY ) () (TAIL1(__VA_ARGS__)) \
+        static_assert(sizeof(STRINGIFY(HEAD(__VA_ARGS__))) < NAME_SIZE, "field name too large: sizeof(" STRINGIFY(HEAD1(__VA_ARGS__)) ") > " STRINGIFY(NAME_SIZE) ); \
+        DEFER2 ( MSG_INDIRECT_VERIFY ) () (TAIL2(__VA_ARGS__)) \
     )
 
 #define MSG_INDIRECT_DECL() MSG_NO_EVAL_DECL
@@ -19,9 +19,9 @@
     (                                                                                                             \
         char CAT(HEAD1(__VA_ARGS__), _name)[NAME_SIZE];                                                           \
         SIZE_TYPE CAT(HEAD1(__VA_ARGS__), _size);                                                                 \
-        HEAD(__VA_ARGS__) HEAD1(__VA_ARGS__);                                                                     \
+        HEAD(__VA_ARGS__) HEAD1(__VA_ARGS__) [HEAD2(__VA_ARGS__)];                                                \
                                                                                                                   \
-        DEFER2 ( MSG_INDIRECT_DECL ) () (TAIL1(__VA_ARGS__))                                                      \
+        DEFER2 ( MSG_INDIRECT_DECL ) () (TAIL2(__VA_ARGS__))                                                      \
     )
 
 #define MSG_INDIRECT_COMPOUND() MSG_NO_EVAL_COMPOUND
@@ -31,7 +31,7 @@
         . CAT(HEAD1(__VA_ARGS__), _name) = STRINGIFY(HEAD1(__VA_ARGS__)) COMMA                                    \
         . CAT(HEAD1(__VA_ARGS__), _size) = sizeof(HEAD(__VA_ARGS__)) COMMA                                        \
         /*.HEAD1(__VA_ARGS__) = 0;*/                                                                              \
-        DEFER2 ( MSG_INDIRECT_COMPOUND ) () (TAIL1(__VA_ARGS__))                                                  \
+        DEFER2 ( MSG_INDIRECT_COMPOUND ) () (TAIL2(__VA_ARGS__))                                                  \
     )
 
 #define MSG_DEF(_name, _id, ...)                                                                                  \
@@ -42,7 +42,7 @@
 
 
 /*
-msg_def(msg, 'a', int, a, float, b) :
+msg_def(msg, 'a', int, a, 1, float, b, 1, char, c, 32) :
 
 struct __attribute__((__packed__))
 {
@@ -50,10 +50,13 @@ struct __attribute__((__packed__))
   SIZE_TYPE size;
   char a_name[NAME_SIZE];
   SIZE_TYPE a_size;
-  int a;
+  int a[1];
   char b_name[NAME_SIZE];
   SIZE_TYPE b_size;
-  float b;
+  float b[1];
+  char c_name[NAME_SIZE];
+  SIZE_TYPE c_size;
+  float c[32];
 }
 msg =
 {

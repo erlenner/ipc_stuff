@@ -6,15 +6,14 @@
 #define DEFER5(...) __VA_ARGS__ DEFER4(EMPTY) ()
 
 #define EVAL_1(...) __VA_ARGS__
-//#define EVAL_2(...) EVAL_1(EVAL_1(__VA_ARGS__))
+#define EVAL_2(...) EVAL_1(EVAL_1(__VA_ARGS__))
 //#define EVAL_3(...) EVAL_2(EVAL_2(__VA_ARGS__))
 //#define EVAL_4(...) EVAL_3(EVAL_3(__VA_ARGS__))
 //#define EVAL_5(...) EVAL_4(EVAL_4(__VA_ARGS__))
 //#define EVAL_6(...) EVAL_5(EVAL_5(__VA_ARGS__))
 //#define EVAL_7(...) EVAL_6(EVAL_6(__VA_ARGS__))
 //#define EVAL_8(...) EVAL_7(EVAL_7(__VA_ARGS__))
-//#define EVAL(...) EVAL_8(__VA_ARGS__)
-#define EVAL(...) EVAL_1(__VA_ARGS__)
+#define EVAL(...) EVAL_2(__VA_ARGS__)
 
 #define IF_1(true, ...) true
 #define IF_0(true, ...) __VA_ARGS__

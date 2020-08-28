@@ -25,10 +25,11 @@ int main()
   }
 
 
-  msg_def(msg, "abc", int, a, float, b);
-  msg.a = 5;
-  msg.b = 3.14;
-  printf("msg: %s, %d, %d, %f\n", msg.id, msg.size, msg.a, msg.b);
+  msg_def(msg, "abc", int, a, 1, float, b, 1, char, c, 32);
+  msg.a[0] = 5;
+  msg.b[0] = 3.14;
+  sprintf(msg.c, "hei");
+  printf("msg: %s, %d, %d, %f, %s\n", msg.id, msg.size, msg.a[0], msg.b[0], msg.c);
 
   //opt_queue_def(my_struct, 64) opt_queue;
 
