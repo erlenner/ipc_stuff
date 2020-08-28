@@ -75,7 +75,12 @@
 #define CAT(a, b) EVAL_CAT_WITH ( GET_CAT_EXP(a, b) )
 
 #define HEAD(x, ...) x
+#define HEAD1(x, y, ...) y
+#define HEAD2(x, y, z, ...) z
+
 #define TAIL(x, ...) __VA_ARGS__
+#define TAIL1(x, y, ...) __VA_ARGS__
+#define TAIL2(x, y, z, ...) __VA_ARGS__
  
 #define TEST_LAST EXISTS(1)
 #define IS_LIST_EMPTY(...) \
@@ -94,9 +99,6 @@
 #define OPT_REM_ENCLOSE(...) \
     IF_ENCLOSED (__VA_ARGS__) ( REM_ENCLOSE(__VA_ARGS__), __VA_ARGS__ )
  
-
-#define VICE(x, y, ...) y
-#define VICE_TAIL(x, y, ...) __VA_ARGS__
 
 
 #define _STRINGIFY(x) #x

@@ -9,29 +9,29 @@
 #define MSG_NO_EVAL_VERIFY(...) \
     IF ( IS_LIST_NOT_EMPTY( __VA_ARGS__ )  ) \
     ( \
-        static_assert(sizeof(STRINGIFY(VICE(__VA_ARGS__))) < NAME_SIZE, "field name too large: sizeof(" STRINGIFY(VICE(__VA_ARGS__)) ") > " STRINGIFY(NAME_SIZE) ); \
-        DEFER2 ( MSG_INDIRECT_VERIFY ) () (VICE_TAIL(__VA_ARGS__)) \
+        static_assert(sizeof(STRINGIFY(HEAD1(__VA_ARGS__))) < NAME_SIZE, "field name too large: sizeof(" STRINGIFY(HEAD1(__VA_ARGS__)) ") > " STRINGIFY(NAME_SIZE) ); \
+        DEFER2 ( MSG_INDIRECT_VERIFY ) () (TAIL1(__VA_ARGS__)) \
     )
 
 #define MSG_INDIRECT_DECL() MSG_NO_EVAL_DECL
 #define MSG_NO_EVAL_DECL(...)                                                                                     \
     IF ( IS_LIST_NOT_EMPTY( __VA_ARGS__ )  )                                                                      \
     (                                                                                                             \
-        char CAT(VICE(__VA_ARGS__), _name)[NAME_SIZE];                                                            \
-        SIZE_TYPE CAT(VICE(__VA_ARGS__), _size);                                                                  \
-        HEAD(__VA_ARGS__) VICE(__VA_ARGS__);                                                                      \
+        char CAT(HEAD1(__VA_ARGS__), _name)[NAME_SIZE];                                                           \
+        SIZE_TYPE CAT(HEAD1(__VA_ARGS__), _size);                                                                 \
+        HEAD(__VA_ARGS__) HEAD1(__VA_ARGS__);                                                                     \
                                                                                                                   \
-        DEFER2 ( MSG_INDIRECT_DECL ) () (VICE_TAIL(__VA_ARGS__))                                                  \
+        DEFER2 ( MSG_INDIRECT_DECL ) () (TAIL1(__VA_ARGS__))                                                      \
     )
 
 #define MSG_INDIRECT_COMPOUND() MSG_NO_EVAL_COMPOUND
 #define MSG_NO_EVAL_COMPOUND(...)                                                                                 \
     IF ( IS_LIST_NOT_EMPTY( __VA_ARGS__ )  )                                                                      \
     (                                                                                                             \
-        . CAT(VICE(__VA_ARGS__), _name) = STRINGIFY(VICE(__VA_ARGS__)) COMMA                                      \
-        . CAT(VICE(__VA_ARGS__), _size) = sizeof(HEAD(__VA_ARGS__)) COMMA                                         \
-        /*.VICE(__VA_ARGS__) = 0;*/                                                                               \
-        DEFER2 ( MSG_INDIRECT_COMPOUND ) () (VICE_TAIL(__VA_ARGS__))                                              \
+        . CAT(HEAD1(__VA_ARGS__), _name) = STRINGIFY(HEAD1(__VA_ARGS__)) COMMA                                    \
+        . CAT(HEAD1(__VA_ARGS__), _size) = sizeof(HEAD(__VA_ARGS__)) COMMA                                        \
+        /*.HEAD1(__VA_ARGS__) = 0;*/                                                                              \
+        DEFER2 ( MSG_INDIRECT_COMPOUND ) () (TAIL1(__VA_ARGS__))                                                  \
     )
 
 #define MSG_DEF(_name, _id, ...)                                                                                  \
@@ -62,3 +62,33 @@ msg =
 };
 */
 #define msg_def MSG_DEF
+//
+//
+//#define TYPE_FROM_SIZE(x) 
+//  _Generic((x),                              \
+//    char:  (char)0,                          \
+//    __scalar_type_to_expr_cases(char),       \
+//    __scalar_type_to_expr_cases(short),      \
+//    __scalar_type_to_expr_cases(int),        \
+//    __scalar_type_to_expr_cases(long),       \
+//    __scalar_type_to_expr_cases(long long),  \
+//    default: (x)))
+//
+//// printf(msg_print(msg));
+//#define msg_print(msg)\
+//  ({
+//    static char ret[(msg).size];
+//    sprintf(ret, "id: %s, size: %d", msg.id, msg.size);
+//
+//    int i = sizeof(msg.id) + sizeof(msg.size);
+//    while (i < (msg).size)
+//    {
+//      char *c = ((char*)&(msg)) + i;
+//      
+//      //for (;c[i] != '\0'; ++i) {}
+//      sprintf(ret, "%s, %s: %f", ret, c, (float)msg);
+//
+//      sprintf(ret, "%s ")
+//    }
+//    ret;
+//  })
