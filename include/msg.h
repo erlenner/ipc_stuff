@@ -34,11 +34,11 @@
         DEFER2 ( MSG_INDIRECT_COMPOUND ) () (TAIL2(__VA_ARGS__))                                                  \
     )
 
-#define MSG_DEF(_name, _id, ...)                                                                                  \
-    static_assert(sizeof(_id) < ID_SIZE, "id too large: sizeof(" _id ") > " STRINGIFY(ID_SIZE) );                 \
+#define MSG_DEF(_id, ...)                                                                                  \
+    static_assert(sizeof(STRINGIFY(_id)) < ID_SIZE, "id too large: sizeof(" STRINGIFY(_id) ") > " STRINGIFY(ID_SIZE) );                 \
     EVAL(MSG_NO_EVAL_VERIFY(__VA_ARGS__))                                                                         \
     struct __attribute__((__packed__)) { char id[ID_SIZE]; SIZE_TYPE size; EVAL(MSG_NO_EVAL_DECL(__VA_ARGS__)) }  \
-        _name = { .id = _id, .size = sizeof(_name), EVAL(MSG_NO_EVAL_COMPOUND(__VA_ARGS__)) }
+        _id = { .id = STRINGIFY(_id), .size = sizeof(_id), EVAL(MSG_NO_EVAL_COMPOUND(__VA_ARGS__)) }
 
 
 /*
@@ -46,7 +46,7 @@ msg_def(msg, "id", int, a, 1, float, b, 1, char, c, 32) :
 
 struct __attribute__((__packed__))
 {
-  char id[ID_SIZE] = "id";
+  char id[ID_SIZE] = "msg";
   SIZE_TYPE size = 88;
   char a_name[NAME_SIZE] = "a";
   SIZE_TYPE a_size = 4;
