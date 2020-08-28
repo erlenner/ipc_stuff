@@ -1,3 +1,5 @@
+// macro tutorial: http://saadahmad.ca/cc-preprocessor-metaprogramming-basic-pattern-matching-macros-and-conditionals/
+
 #define EMPTY() 
 #define DEFER(...) __VA_ARGS__ EMPTY()
 #define DEFER2(...) __VA_ARGS__ DEFER(EMPTY) ()
