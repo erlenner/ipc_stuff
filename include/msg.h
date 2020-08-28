@@ -68,38 +68,39 @@ msg =
 
 
 // printf(msg_print(msg));
-//#define msg_print(msg)                                    \
-//  ({                                                      \
-//    static char ret[sizeof(msg)];                         \
-//    sprintf(ret, "id: %s, size: %d", msg.id, msg.size);   \
-//                                                          \
-//    int i = sizeof(msg.id) + sizeof(msg.size);            \
-//    while (i < (msg).size)                                \
-//    {                                                     \
-//      char *c = ((char*)&(msg)) + i;                      \
-//                                                          \
-//      /*for (;c[i] != '\0'; ++i) {}*/                     \
-//      sprintf(ret, "%s, %s: ", ret, c);                  \
-//                                                          \
-//      i+= strlen(c);                                      \
-//      void *p;                                            \
-//      p = ((void*)&(msg) + i);                            \
-//      SIZE_TYPE field_size = *(SIZE_TYPE*)p;              \
-//                                                          \
-//      i += sizeof(field_size);                            \
-//      p = ((void*)&(msg) + i);                            \
-//                                                          \
-//      switch(field_size)                                  \
-//      {                                                   \
-//        case 4:                                           \
-//          sprintf(ret, "%s, %f", ret, *(float*)p);        \
-//          break;                                          \
-//        default:                                          \
-//          sprintf(ret, "%s, %s", ret, (char*)p);          \
-//          break;                                          \
-//      }                                                   \
-//                                                          \
-//      i += field_size;                                    \
-//    }                                                     \
-//    ret;                                                  \
-//  })
+#define msg_print(msg)                                    \
+  ({                                                      \
+    static char ret[sizeof(msg) * 10];                    \
+    sprintf(ret, "id: %s, size: %d", msg.id, msg.size);   \
+                                                          \
+    int i = sizeof(msg.id) + sizeof(msg.size);            \
+    while (i < (msg).size)                                \
+    {                                                     \
+      void *p;                                            \
+      p = (void*)&(msg) + i;                              \
+      char *c = (char*)p;                                 \
+                                                          \
+      /*for (;c[i] != '\0'; ++i) {}*/                     \
+      sprintf(ret, "%s, %s: ", ret, c);                   \
+                                                          \
+      i += NAME_SIZE;                                     \
+      p = (void*)&(msg) + i;                              \
+      SIZE_TYPE field_size = *(SIZE_TYPE*)p;              \
+                                                          \
+      i += sizeof(field_size);                            \
+      p = (void*)&(msg) + i;                              \
+                                                          \
+      switch(field_size)                                  \
+      {                                                   \
+        case 4:                                           \
+          sprintf(ret, "%s, %f", ret, *(float*)p);        \
+          break;                                          \
+        default:                                          \
+          sprintf(ret, "%s, %s", ret, (char*)p);          \
+          break;                                          \
+      }                                                   \
+                                                          \
+      i += field_size;                                    \
+    }                                                     \
+    ret;                                                  \
+  })

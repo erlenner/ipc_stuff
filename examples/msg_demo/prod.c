@@ -31,7 +31,7 @@ int main()
   sprintf(msg.c, "hei");
   printf("msg: %s, %d, %d, %f, %s\n", msg.id, msg.size, msg.a[0], msg.b[0], msg.c);
 
-  //printf(msg_print(msg));
+  printf("%s%s", msg_print(msg), "\n");
 
   //opt_queue_def(my_struct, 64) opt_queue;
 
