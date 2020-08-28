@@ -7,12 +7,7 @@ https://github.com/boostorg/lockfree/blob/develop/include/boost/lockfree/spsc_qu
 
 #pragma once
 #include <assert.h> // for static_assert
-#include <stdatomic.h>
-
-#define MX6_CACHELINE_BYTES 32
-#define CACHELINE_BYTES MX6_CACHELINE_BYTES
-// L1: https://developer.arm.com/documentation/ddi0388/f/Level-1-Memory-System/About-the-L1-memory-system
-// L2: https://community.nxp.com/thread/510105
+#include "smp.h"
 
 #define ring_queue_def(STORAGE, SIZE)\
 static_assert((SIZE & (SIZE - 1)) == 0, "SIZE not binary exponent (2^n)");  \
@@ -44,17 +39,18 @@ do {                            \
 #define ring_queue_push(_queue, _entry, .../*error*/)                               \
 do {                                                                                \
   typeof(_queue) const q = _queue;                                                  \
-  typeof(_entry) e = _entry;                                                        \
                                                                                     \
-  int wi = atomic_load_explicit(&(q)->write_index, memory_order_relaxed);           \
+  int wi = (q)->write_index;                                                        \
+  const int ri = smp_load_acquire(q->read_index);                                   \
+                                                                                    \
   wi = next_index(wi, ring_queue_size(q));                                          \
                                                                                     \
-  if (wi == atomic_load_explicit(&(q)->read_index, memory_order_acquire))           \
+  if (wi == ri)                                                                     \
     OPT_SET(1, __VA_ARGS__)                                                         \
   else                                                                              \
   {                                                                                 \
-    (q)->buffer[wi] = e;                                                            \
-    atomic_store_explicit(&(q)->write_index, wi, memory_order_release);             \
+    (q)->buffer[wi] = _entry;                                                       \
+    smp_store_release(q->write_index, wi);                                          \
     OPT_SET(0, __VA_ARGS__)                                                         \
   }                                                                                 \
                                                                                     \
@@ -63,43 +59,37 @@ do {                                                                            
 #define ring_queue_eat(_queue, _entry, .../*error*/)                                \
 do {                                                                                \
   typeof(_queue) const q = _queue;                                                  \
-  typeof(_entry) e = _entry;                                                        \
                                                                                     \
-  const int wi = atomic_load_explicit(&(q)->write_index, memory_order_acquire);     \
-  int ri = atomic_load_explicit(&(q)->read_index, memory_order_relaxed);            \
+  int ri = (q)->read_index;                                                         \
+  const int wi = smp_load_acquire(q->write_index);                                  \
                                                                                     \
   if (ri == wi)                                                                     \
     OPT_SET(1, __VA_ARGS__)                                                         \
   else                                                                              \
   {                                                                                 \
     ri = next_index(ri, ring_queue_size(q));                                        \
-    e = (q)->buffer[ri];                                                            \
-    atomic_store_explicit(&(q)->read_index, ri, memory_order_release);              \
+    _entry = (q)->buffer[ri];                                                       \
+    smp_store_release(q->read_index, ri);                                           \
     OPT_SET(0, __VA_ARGS__)                                                         \
   }                                                                                 \
-                                                                                    \
-  _entry = e;                                                                       \
 } while(0)
 
 #define ring_queue_eat_last(_queue, _entry, .../*error*/)                           \
 do {                                                                                \
   typeof(_queue) const q = _queue;                                                  \
-  typeof(_entry) e = _entry;                                                        \
                                                                                     \
-  const int wi = atomic_load_explicit(&q->write_index, memory_order_acquire);       \
-  int ri = atomic_load_explicit(&q->read_index, memory_order_relaxed);              \
+  const int wi = smp_load_acquire(q->write_index);                                  \
+  int ri = q->read_index;                                                           \
                                                                                     \
   if (ri == wi)                                                                     \
     OPT_SET(1, __VA_ARGS__)                                                         \
   else                                                                              \
   {                                                                                 \
     ri = wi;                                                                        \
-    e = q->buffer[ri];                                                              \
-    atomic_store_explicit(&q->read_index, ri, memory_order_release);                \
+    _entry = q->buffer[ri];                                                         \
+    smp_store_release(q->read_index, ri);                                           \
     OPT_SET(0, __VA_ARGS__)                                                         \
   }                                                                                 \
-                                                                                    \
-  _entry = e;                                                                       \
 } while(0)
 
 
@@ -112,8 +102,8 @@ do {                                                                            
   typeof(_queue) const q = _queue;                                                  \
   typeof(&(q->buffer[0])) c = _cache;                                               \
                                                                                     \
-  const int wi = atomic_load_explicit(&q->write_index, memory_order_acquire);       \
-  int ri = atomic_load_explicit(&q->read_index, memory_order_relaxed);              \
+  const int wi = smp_load_acquire(q->write_index);                                  \
+  int ri = q->read_index;                                                           \
                                                                                     \
   if (ri == wi)                                                                     \
     _nread = 0;                                                                     \
@@ -137,6 +127,6 @@ do {                                                                            
     }                                                                               \
                                                                                     \
     ri = wi;                                                                        \
-    atomic_store_explicit(&q->read_index, ri, memory_order_release);                \
+    smp_store_release(q->read_index, ri);                                           \
   }                                                                                 \
 } while(0)

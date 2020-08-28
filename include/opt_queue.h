@@ -9,31 +9,8 @@ https://github.com/rigtorp/Seqlock
 
 #pragma once
 #include <assert.h> // for static_assert
-#include <stdatomic.h>
+#include "smp.h"
 
-#define MX6_CACHELINE_BYTES 32
-#define CACHELINE_BYTES MX6_CACHELINE_BYTES
-// L1: https://developer.arm.com/documentation/ddi0388/f/Level-1-Memory-System/About-the-L1-memory-system
-// L2: https://community.nxp.com/thread/510105
-
-
-//#define smp_mb() atomic_thread_fence(memory_order_acq_rel);
-//#define smp_wmb() smp_mb()
-//#define smp_rmb() smp_mb()
-
-#if __arm__
-// https://github.com/torvalds/linux/blob/master/arch/arm/include/asm/barrier.h
-#define dmb(option) __asm__ __volatile__ ("dmb " #option : : : "memory")
-#define smp_mb() dmb(ish);
-#define smp_wmb() dmb(ishst);
-#define smp_rmb() smp_mb()
-//#define smp_rmb() dmb(ishld); // armv8
-#elif __x86_64__
-#define barrier() __asm__ __volatile__("": : :"memory")
-#define smp_mb() barrier()
-#define smp_wmb() barrier()
-#define smp_rmb() barrier()
-#endif
 
 #define opt_queue_def(STORAGE, SIZE)\
 static_assert((SIZE & (SIZE - 1)) == 0, "SIZE not binary exponent (2^n)");  \
@@ -73,20 +50,19 @@ _entry (in): instance of STORAGE object passed to opt_queue_def
 #define opt_queue_write(_queue, _entry)                                             \
 do {                                                                                \
   typeof(_queue) const q = _queue;                                                  \
-  typeof(_entry) e = _entry;                                                        \
                                                                                     \
   int seq = (q)->seq;                                                               \
                                                                                     \
-  int wi = atomic_load_explicit(&(q)->write_index, memory_order_acquire);           \
+  int wi = smp_load_acquire(q->write_index);                                        \
   wi = next_index(wi, opt_queue_size(q));                                           \
                                                                                     \
   (q)->buffer[wi].seq = ++seq;                                                      \
   smp_wmb();                                                                        \
-  (q)->buffer[wi].entry = e;                                                        \
+  (q)->buffer[wi].entry = _entry;                                                   \
   smp_wmb();                                                                        \
   (q)->buffer[wi].seq = ++seq;                                                      \
                                                                                     \
-  atomic_store_explicit(&(q)->write_index, wi, memory_order_release);               \
+  smp_store_release(q->write_index, wi);                                            \
   /*smp_wmb();*/                                                                    \
   /*(q)->write_index = wi;*/                                                        \
                                                                                     \
@@ -102,13 +78,12 @@ outout code (out, optional): integer representing the sequence number of the rea
 #define opt_queue_read(_queue, _entry, .../*output code*/)                          \
 do {                                                                                \
   typeof(_queue) const q = _queue;                                                  \
-  typeof(_entry) e = _entry;                                                        \
                                                                                     \
   while(1)                                                                          \
   {                                                                                 \
     /*static int total = 0;*/                                                       \
     /*++total;*/                                                                    \
-    const int wi = atomic_load_explicit(&(q)->write_index, memory_order_acquire);   \
+    const int wi = smp_load_acquire(q->write_index);                                \
     int seq1 = (q)->buffer[wi].seq;                                                 \
     if (seq1 & 1)                                                                   \
     {                                                                               \
@@ -117,13 +92,12 @@ do {                                                                            
     }                                                                               \
                                                                                     \
     smp_rmb();                                                                      \
-    e = (q)->buffer[wi].entry;                                                      \
+    _entry = (q)->buffer[wi].entry;                                                 \
     smp_rmb();                                                                      \
                                                                                     \
     int seq2 = (q)->buffer[wi].seq;                                                 \
     if (seq2 == seq1)                                                               \
     {                                                                               \
-      _entry = e;                                                                   \
       OPT_SET(seq2, __VA_ARGS__)                                                    \
       break;                                                                        \
     }                                                                               \
