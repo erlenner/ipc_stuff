@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <signal.h>
 
-#include "opt_queue.h"
-#include "ipc.h"
-#include "debug.h"
+//#include "opt_queue.h"
+//#include "ipc.h"
+//#include "debug.h"
 #include "msg.h"
 
 int run = 1;

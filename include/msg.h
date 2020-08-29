@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdint.h>
 #include "macro.h"
 
@@ -28,17 +29,17 @@
 #define MSG_NO_EVAL_COMPOUND(...)                                                                                 \
     IF ( IS_LIST_NOT_EMPTY( __VA_ARGS__ )  )                                                                      \
     (                                                                                                             \
-        . CAT(HEAD1(__VA_ARGS__), _name) = STRINGIFY(HEAD1(__VA_ARGS__)) COMMA                                    \
-        . CAT(HEAD1(__VA_ARGS__), _size) = sizeof(HEAD(__VA_ARGS__)) * HEAD2(__VA_ARGS__) COMMA                   \
-        /*.HEAD1(__VA_ARGS__) = 0;*/                                                                              \
+        STRINGIFY(HEAD1(__VA_ARGS__)) COMMA                                    \
+        sizeof(HEAD(__VA_ARGS__)) * HEAD2(__VA_ARGS__) COMMA                   \
+        {} COMMA                   \
         DEFER2 ( MSG_INDIRECT_COMPOUND ) () (TAIL2(__VA_ARGS__))                                                  \
     )
 
 #define MSG_DEF(_id, ...)                                                                                  \
-    static_assert(sizeof(STRINGIFY(_id)) < ID_SIZE, "id too large: sizeof(" STRINGIFY(_id) ") > " STRINGIFY(ID_SIZE) );                 \
-    EVAL(MSG_NO_EVAL_VERIFY(__VA_ARGS__))                                                                         \
-    struct __attribute__((__packed__)) { char id[ID_SIZE]; SIZE_TYPE size; EVAL(MSG_NO_EVAL_DECL(__VA_ARGS__)) }  \
-        _id = { .id = STRINGIFY(_id), .size = sizeof(_id), EVAL(MSG_NO_EVAL_COMPOUND(__VA_ARGS__)) }
+    static_assert(sizeof(STRINGIFY(_id)) < ID_SIZE, "id too large: sizeof(" STRINGIFY(_id) ") > " STRINGIFY(ID_SIZE) ); \
+    EVAL(MSG_NO_EVAL_VERIFY(__VA_ARGS__))                                                                               \
+    struct __attribute__((__packed__)) { char id[ID_SIZE]; SIZE_TYPE size; EVAL(MSG_NO_EVAL_DECL(__VA_ARGS__)) }        \
+        _id = { STRINGIFY(_id), sizeof(_id), EVAL(MSG_NO_EVAL_COMPOUND(__VA_ARGS__)) }
 
 
 /*
