@@ -111,3 +111,34 @@ do {                                                                            
   /*fprintf(stderr, "i");*/                                                         \
   /*printf("ok %d\n", _entry);*/                                                    \
 } while(0)
+
+#ifdef __cplusplus
+template<typename STORAGE, int SIZE>
+class calm_seq_lock
+{
+  int write_index;                                                          \
+  int seq;                                                                  \
+  char padding[CACHELINE_BYTES - 2*sizeof(int)];                            \
+
+  struct                                                                    \
+  {                                                                         \
+    int seq;                                                                \
+    STORAGE entry;                                                          \
+  } buffer[SIZE];                                                           \
+
+public:
+  int write(STORAGE entry)
+  {
+    calm_seq_lock_write(this, entry);
+    return 0;
+  }
+
+  int read(STORAGE& entry)
+  {
+    int seq;
+    calm_seq_lock_read(this, entry, seq);
+    return seq;
+  }
+
+} __attribute__ ((aligned(CACHELINE_BYTES)));
+#endif

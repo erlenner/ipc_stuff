@@ -1,4 +1,6 @@
-#ifndef __cplusplus
+#ifdef __cplusplus
+#include <atomic>
+#else
 #include <stdatomic.h>
 #endif
 
@@ -38,8 +40,13 @@
 #define cpu_relax() barrier()
 #endif
 
+#ifdef __cplusplus
+#define smp_load_acquire(p) std::atomic_load_explicit((std::atomic<typeof(p)>*)&p, std::memory_order_acquire)
+#define smp_store_release(p, v) std::atomic_store_explicit((std::atomic<typeof(p)>*)&p, v, std::memory_order_release)
+#else
 #define smp_load_acquire(p) atomic_load_explicit(&p, memory_order_acquire)
 #define smp_store_release(p, v) atomic_store_explicit(&p, v, memory_order_release)
+#endif
 
 //#define __scalar_type_to_expr_cases(type)       \
 //    unsigned type:  (unsigned type)0,           \
