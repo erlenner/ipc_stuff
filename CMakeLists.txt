@@ -34,3 +34,12 @@ install(TARGETS calm_seq_lock_prod DESTINATION bin)
 add_executable(calm_seq_lock_cons examples/calm_seq_lock_demo/cons.c)
 target_link_libraries(calm_seq_lock_cons -lrt)
 install(TARGETS calm_seq_lock_cons DESTINATION bin)
+
+
+add_executable(seq_lock_prod examples/seq_lock_demo/prod.c)
+target_link_libraries(seq_lock_prod -lrt)
+install(TARGETS seq_lock_prod DESTINATION bin)
+
+add_executable(seq_lock_cons examples/seq_lock_demo/cons.c)
+target_link_libraries(seq_lock_cons -lrt)
+install(TARGETS seq_lock_cons DESTINATION bin)

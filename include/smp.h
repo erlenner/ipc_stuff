@@ -1,5 +1,8 @@
 #include <stdatomic.h>
 
+
+#define barrier() __asm__ __volatile__("": : :"memory")
+
 #if __arm__
 #define CACHELINE_BYTES 32
 // L1: https://developer.arm.com/documentation/ddi0388/f/Level-1-Memory-System/About-the-L1-memory-system
@@ -14,13 +17,23 @@
 //#define smp_mb() atomic_thread_fence(memory_order_acq_rel);
 //#define smp_wmb() smp_mb()
 //#define smp_rmb() smp_mb()
+
+//#define cpu_relax() \
+//do {                \
+//  smp_mb();         \
+//  __asm__ __volatile__("nop; nop; nop; nop; nop; nop; nop; nop; nop; nop;");  \
+//} while (0)
+
+#define cpu_relax() barrier()
+
 #elif __x86_64__
 #define CACHELINE_BYTES 64
 
-#define barrier() __asm__ __volatile__("": : :"memory")
 #define smp_mb() barrier()
 #define smp_wmb() barrier()
 #define smp_rmb() barrier()
+
+#define cpu_relax() barrier()
 #endif
 
 #define smp_load_acquire(p) atomic_load_explicit(&p, memory_order_acquire)
