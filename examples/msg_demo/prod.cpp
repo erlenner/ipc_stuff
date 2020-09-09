@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include "msg.h"
 
-    constexpr char id[] = "msg0";
-
 int main()
 {
 
@@ -19,7 +17,7 @@ int main()
     msg0.b = 3.14;
     sprintf(msg0.c, "hei");
 
-    msg<typeof(msg0), id> m(msg0);
+    msg<typeof(msg0)> m(msg0, "msg0");
 
     //printf("%s %d: %d, %f, %s\n", msg0.id, msg0.size, msg0.a, msg0.b, msg0.c);
     //printf("%s%s", msg_print(msg0), "\n");
