@@ -43,11 +43,11 @@
 
 
 /*
-msg_def(msg, "id", int, a, 1, float, b, 1, char, c, 32) :
+old_msg_def(old_msg, "id", int, a, 1, float, b, 1, char, c, 32) :
 
 struct __attribute__((__packed__))
 {
-  char id[ID_SIZE] = "msg";
+  char id[ID_SIZE] = "old_msg";
   SIZE_TYPE size = 88;
   char a_id[ID_SIZE] = "a";
   SIZE_TYPE a_size = 4;
@@ -59,28 +59,28 @@ struct __attribute__((__packed__))
   SIZE_TYPE c_size = 32;
   float c[32];
 }
-msg =
+old_msg =
 {
   . a_id = "a" , . a_size = sizeof(int) ,
   . b_id = "b" , . b_size = sizeof(float) ,
 };
 */
-#define msg_def MSG_DEF
+#define old_msg_def MSG_DEF
 
-#define msg_match(msg, buffer) (strcmp((typeof(msg)*(buffer)->id), msg.id) == 0)
+#define old_msg_match(old_msg, buffer) (strcmp((typeof(old_msg)*(buffer)->id), old_msg.id) == 0)
 
-#define msg_header_size(msg) (sizeof(msg.id) + sizeof(msg.size))
+#define old_msg_header_size(old_msg) (sizeof(old_msg.id) + sizeof(old_msg.size))
 
-#define msg_size(buffer) (typeof(msg)*(buffer)->msg.size)
+#define old_msg_size(buffer) (typeof(old_msg)*(buffer)->old_msg.size)
 
-// msg_parse(msg, buffer);
-#define msg_parse(msg, buffer)                          \
+// old_msg_parse(old_msg, buffer);
+#define old_msg_parse(old_msg, buffer)                          \
 do {                                                    \
-  int i = msg_header_size(msg);                         \
-  while (i < (msg).size)                                \
+  int i = old_msg_header_size(old_msg);                         \
+  while (i < (old_msg).size)                                \
   {                                                     \
     void *p;                                            \
-    p = (void*)&(msg) + i;                              \
+    p = (void*)&(old_msg) + i;                              \
     {                                                   \
       char *field_id = (char*)p;                        \
       /*for (;c[i] != '\0'; ++i) {}*/                   \
@@ -88,12 +88,12 @@ do {                                                    \
       
     }                                                   \
                                                         \
-    i += sizeof(msg.id);                                \
-    p = (void*)&(msg) + i;                              \
+    i += sizeof(old_msg.id);                                \
+    p = (void*)&(old_msg) + i;                              \
     SIZE_TYPE field_size = *(SIZE_TYPE*)p;              \
                                                         \
     i += sizeof(field_size);                            \
-    p = (void*)&(msg) + i;                              \
+    p = (void*)&(old_msg) + i;                              \
                                                         \
     switch(field_size)                                  \
     {                                                   \
@@ -111,28 +111,28 @@ do {                                                    \
 } while(0)
 
 
-//// printf(msg_print(msg));
-//#define msg_print(msg)                                    \
+//// printf(old_msg_print(old_msg));
+//#define old_msg_print(old_msg)                                    \
 //  ({                                                      \
-//    static char ret[sizeof(msg) * 10];                    \
-//    sprintf(ret, "id: %s, size: %d", msg.id, msg.size);   \
+//    static char ret[sizeof(old_msg) * 10];                    \
+//    sprintf(ret, "id: %s, size: %d", old_msg.id, old_msg.size);   \
 //                                                          \
-//    int i = sizeof(msg.id) + sizeof(msg.size);            \
-//    while (i < (msg).size)                                \
+//    int i = sizeof(old_msg.id) + sizeof(old_msg.size);            \
+//    while (i < (old_msg).size)                                \
 //    {                                                     \
 //      void *p;                                            \
-//      p = (void*)&(msg) + i;                              \
+//      p = (void*)&(old_msg) + i;                              \
 //      char *c = (char*)p;                                 \
 //                                                          \
 //      /*for (;c[i] != '\0'; ++i) {}*/                     \
 //      sprintf(ret, "%s, %s: ", ret, c);                   \
 //                                                          \
 //      i += ID_SIZE;                                     \
-//      p = (void*)&(msg) + i;                              \
+//      p = (void*)&(old_msg) + i;                              \
 //      SIZE_TYPE field_size = *(SIZE_TYPE*)p;              \
 //                                                          \
 //      i += sizeof(field_size);                            \
-//      p = (void*)&(msg) + i;                              \
+//      p = (void*)&(old_msg) + i;                              \
 //                                                          \
 //      switch(field_size)                                  \
 //      {                                                   \
