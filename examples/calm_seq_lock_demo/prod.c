@@ -18,9 +18,9 @@ int main()
 {
   calm_seq_lock_def(my_struct, 64) calm_seq_lock;
 
-  calm_seq_lock* queue = (calm_seq_lock*)ipc_create("/ipc_test", sizeof(calm_seq_lock));
-  debug_assert(queue != NULL, return -1);
-  //calm_seq_lock_init(queue); // unnecessary with shared memory since ftruncate already gives zero-ed bytes
+  calm_seq_lock* lock = (calm_seq_lock*)ipc_create("/ipc_test", sizeof(calm_seq_lock));
+  debug_assert(lock != NULL, return -1);
+  //calm_seq_lock_init(lock); // unnecessary with shared memory since ftruncate already gives zero-ed bytes
 
   my_struct entry;
   memset(&entry, 0, sizeof(entry));
@@ -29,7 +29,7 @@ int main()
 
   while (run)
   {
-    calm_seq_lock_write(queue, entry);
+    calm_seq_lock_write(lock, entry);
       for (int i=0; i<50; ++i)
       {
         ++(entry.data[i].ii);
@@ -40,7 +40,7 @@ int main()
     //usleep(3 * 1000);
   }
 
-  ipc_unmap((void*)queue, sizeof(calm_seq_lock));
+  ipc_unmap((void*)lock, sizeof(calm_seq_lock));
 
   return 0;
 }

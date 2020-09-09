@@ -21,9 +21,9 @@ typedef struct                                                              \
   STORAGE entry;                                                            \
 } __attribute__ ((aligned(CACHELINE_BYTES)))
 
-#define seq_lock_init(queue)                                    \
+#define seq_lock_init(lock)                                    \
 do {                                                            \
-  memset(queue, 0, sizeof(queue));                              \
+  memset(lock, 0, sizeof(lock));                              \
 } while (0)
 
 // OPT_set(var) : var = 1;
@@ -32,12 +32,12 @@ do {                                                            \
 
 /*
 parameters:
-_queue (in): pointer to object defined by seq_lock_def
+_lock (in): pointer to object defined by seq_lock_def
 _entry (in): instance of STORAGE object passed to seq_lock_def
 */
-#define seq_lock_write(_queue, _entry)                                              \
+#define seq_lock_write(_lock, _entry)                                              \
 do {                                                                                \
-  typeof(_queue) const q = _queue;                                                  \
+  typeof(_lock) const q = _lock;                                                  \
                                                                                     \
   int seq = (q)->seq;                                                               \
                                                                                     \
@@ -51,13 +51,13 @@ do {                                                                            
 
 /*
 parameters:
-_queue (in): pointer to object defined by seq_lock_def
+_lock (in): pointer to object defined by seq_lock_def
 _entry (out): instance of STORAGE object passed to seq_lock_def
 outout code (out, optional): integer representing the sequence number of the read entry
 */
-#define seq_lock_read(_queue, _entry, .../*seq2*/)                                  \
+#define seq_lock_read(_lock, _entry, .../*seq2*/)                                  \
 do {                                                                                \
-  typeof(_queue) const q = _queue;                                                  \
+  typeof(_lock) const q = _lock;                                                  \
                                                                                     \
   while(1)                                                                          \
   {                                                                                 \

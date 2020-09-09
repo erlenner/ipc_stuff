@@ -18,9 +18,9 @@ int main()
 {
   seq_lock_def(my_struct) seq_lock;
 
-  seq_lock* queue = (seq_lock*)ipc_create("/ipc_test", sizeof(seq_lock));
-  debug_assert(queue != NULL, return -1);
-  //seq_lock_init(queue); // unnecessary with shared memory since ftruncate already gives zero-ed bytes
+  seq_lock* lock = (seq_lock*)ipc_create("/ipc_test", sizeof(seq_lock));
+  debug_assert(lock != NULL, return -1);
+  //seq_lock_init(lock); // unnecessary with shared memory since ftruncate already gives zero-ed bytes
 
   my_struct entry;
   memset(&entry, 0, sizeof(entry));
@@ -29,7 +29,7 @@ int main()
 
   while (run)
   {
-    seq_lock_write(queue, entry);
+    seq_lock_write(lock, entry);
       for (int i=0; i<50; ++i)
       {
         ++(entry.data[i].ii);
@@ -41,7 +41,7 @@ int main()
     //usleep(1 * 100);
   }
 
-  ipc_unmap((void*)queue, sizeof(seq_lock));
+  ipc_unmap((void*)lock, sizeof(seq_lock));
 
   return 0;
 }

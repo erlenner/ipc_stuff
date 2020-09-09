@@ -17,8 +17,8 @@ void sig_handler(int sig)
 int main()
 {
   calm_seq_lock_def(my_struct, 64) calm_seq_lock;
-  calm_seq_lock* queue = (calm_seq_lock*)ipc_open("/ipc_test", sizeof(calm_seq_lock));
-  debug_assert(queue != NULL, return -1);
+  calm_seq_lock* lock = (calm_seq_lock*)ipc_open("/ipc_test", sizeof(calm_seq_lock));
+  debug_assert(lock != NULL, return -1);
 
   signal(SIGINT, sig_handler);
 
@@ -32,7 +32,7 @@ int main()
     static int last_seq = 0;
     int seq = 0;
 
-    calm_seq_lock_read(queue, entry, seq);
+    calm_seq_lock_read(lock, entry, seq);
 
     if (seq != last_seq)
     {
@@ -58,7 +58,7 @@ int main()
     //usleep(3 * 1000);
   }
 
-  ipc_unmap((void*)queue, sizeof(calm_seq_lock));
+  ipc_unmap((void*)lock, sizeof(calm_seq_lock));
 
   return 0;
 }
