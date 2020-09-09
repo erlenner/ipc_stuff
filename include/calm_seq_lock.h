@@ -1,5 +1,8 @@
 /*
-Optimistic Queue
+calm_seq_lock.h
+
+Modification of seq_lock.h.
+Supports non-stop writing at the cost of taking up more space
 
 Inspired by:
 http://www.1024cores.net/home/lock-free-algorithms/reader-writer-problem/improved-lock-free-seqlock
@@ -31,7 +34,7 @@ typedef struct                                                              \
 
 #define calm_seq_lock_size(queue) (sizeof((queue)->buffer) / sizeof((queue)->buffer[0]))
 
-#define calm_seq_lock_init(queue)                                   \
+#define calm_seq_lock_init(queue)                               \
 do {                                                            \
   memset(queue, 0, sizeof(queue));                              \
 } while (0)
@@ -47,14 +50,14 @@ parameters:
 _queue (in): pointer to object defined by calm_seq_lock_def
 _entry (in): instance of STORAGE object passed to calm_seq_lock_def
 */
-#define calm_seq_lock_write(_queue, _entry)                                             \
+#define calm_seq_lock_write(_queue, _entry)                                         \
 do {                                                                                \
   typeof(_queue) const q = _queue;                                                  \
                                                                                     \
   int seq = (q)->seq;                                                               \
                                                                                     \
   int wi = smp_load_acquire(q->write_index);                                        \
-  wi = next_index(wi, calm_seq_lock_size(q));                                           \
+  wi = next_index(wi, calm_seq_lock_size(q));                                       \
                                                                                     \
   (q)->buffer[wi].seq = ++seq;                                                      \
   smp_wmb();                                                                        \
@@ -75,7 +78,7 @@ _queue (in): pointer to object defined by calm_seq_lock_def
 _entry (out): instance of STORAGE object passed to calm_seq_lock_def
 outout code (out, optional): integer representing the sequence number of the read entry
 */
-#define calm_seq_lock_read(_queue, _entry, .../*output code*/)                          \
+#define calm_seq_lock_read(_queue, _entry, .../*seq2*/)                             \
 do {                                                                                \
   typeof(_queue) const q = _queue;                                                  \
                                                                                     \
