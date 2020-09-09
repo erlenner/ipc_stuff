@@ -86,3 +86,29 @@ do {                                                                            
   /*fprintf(stderr, "i");*/                                                         \
   /*printf("ok %d\n", _entry);*/                                                    \
 } while(0)
+
+#ifdef __cplusplus
+
+template<typename STORAGE>
+class seq_lock
+{
+  int seq;
+  STORAGE entry;
+
+public:
+  int write(STORAGE entry)
+  {
+    seq_lock_write(this, entry);
+    return 0;
+  }
+
+  int read(STORAGE& entry)
+  {
+    int seq;
+    seq_lock_read(this, entry, seq);
+    return seq;
+  }
+
+} __attribute__ ((aligned(CACHELINE_BYTES)));
+
+#endif

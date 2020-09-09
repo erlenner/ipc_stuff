@@ -1,4 +1,6 @@
+#ifndef __cplusplus
 #include <stdatomic.h>
+#endif
 
 
 #define barrier() __asm__ __volatile__("": : :"memory")

@@ -43,3 +43,12 @@ install(TARGETS seq_lock_prod DESTINATION bin)
 add_executable(seq_lock_cons examples/seq_lock_demo/cons.c)
 target_link_libraries(seq_lock_cons -lrt)
 install(TARGETS seq_lock_cons DESTINATION bin)
+
+
+add_executable(cpp_seq_lock_prod examples/cpp_seq_lock_demo/prod.cpp)
+target_link_libraries(cpp_seq_lock_prod -lrt)
+install(TARGETS cpp_seq_lock_prod DESTINATION bin)
+
+add_executable(cpp_seq_lock_cons examples/cpp_seq_lock_demo/cons.cpp)
+target_link_libraries(cpp_seq_lock_cons -lrt)
+install(TARGETS cpp_seq_lock_cons DESTINATION bin)
