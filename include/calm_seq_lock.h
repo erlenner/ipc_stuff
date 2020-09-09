@@ -12,7 +12,7 @@ https://github.com/rigtorp/Seqlock
 #include "smp.h"
 
 
-#define opt_queue_def(STORAGE, SIZE)\
+#define calm_seq_lock_def(STORAGE, SIZE)\
 static_assert((SIZE & (SIZE - 1)) == 0, "SIZE not binary exponent (2^n)");  \
 typedef struct                                                              \
 {                                                                           \
@@ -29,9 +29,9 @@ typedef struct                                                              \
 } __attribute__ ((aligned(CACHELINE_BYTES)))
 
 
-#define opt_queue_size(queue) (sizeof((queue)->buffer) / sizeof((queue)->buffer[0]))
+#define calm_seq_lock_size(queue) (sizeof((queue)->buffer) / sizeof((queue)->buffer[0]))
 
-#define opt_queue_init(queue)                                   \
+#define calm_seq_lock_init(queue)                                   \
 do {                                                            \
   memset(queue, 0, sizeof(queue));                              \
 } while (0)
@@ -44,17 +44,17 @@ do {                                                            \
 
 /*
 parameters:
-_queue (in): pointer to object defined by opt_queue_def
-_entry (in): instance of STORAGE object passed to opt_queue_def
+_queue (in): pointer to object defined by calm_seq_lock_def
+_entry (in): instance of STORAGE object passed to calm_seq_lock_def
 */
-#define opt_queue_write(_queue, _entry)                                             \
+#define calm_seq_lock_write(_queue, _entry)                                             \
 do {                                                                                \
   typeof(_queue) const q = _queue;                                                  \
                                                                                     \
   int seq = (q)->seq;                                                               \
                                                                                     \
   int wi = smp_load_acquire(q->write_index);                                        \
-  wi = next_index(wi, opt_queue_size(q));                                           \
+  wi = next_index(wi, calm_seq_lock_size(q));                                           \
                                                                                     \
   (q)->buffer[wi].seq = ++seq;                                                      \
   smp_wmb();                                                                        \
@@ -71,11 +71,11 @@ do {                                                                            
 
 /*
 parameters:
-_queue (in): pointer to object defined by opt_queue_def
-_entry (out): instance of STORAGE object passed to opt_queue_def
+_queue (in): pointer to object defined by calm_seq_lock_def
+_entry (out): instance of STORAGE object passed to calm_seq_lock_def
 outout code (out, optional): integer representing the sequence number of the read entry
 */
-#define opt_queue_read(_queue, _entry, .../*output code*/)                          \
+#define calm_seq_lock_read(_queue, _entry, .../*output code*/)                          \
 do {                                                                                \
   typeof(_queue) const q = _queue;                                                  \
                                                                                     \

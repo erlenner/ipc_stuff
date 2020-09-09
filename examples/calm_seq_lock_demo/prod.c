@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <signal.h>
 
-#include "opt_queue.h"
+#include "calm_seq_lock.h"
 #include "ipc.h"
 #include "debug.h"
 
@@ -16,11 +16,11 @@ void sig_handler(int sig)
 
 int main()
 {
-  opt_queue_def(my_struct, 64) opt_queue;
+  calm_seq_lock_def(my_struct, 64) calm_seq_lock;
 
-  opt_queue* queue = (opt_queue*)ipc_create("/ipc_test", sizeof(opt_queue));
+  calm_seq_lock* queue = (calm_seq_lock*)ipc_create("/ipc_test", sizeof(calm_seq_lock));
   debug_assert(queue != NULL, return -1);
-  //opt_queue_init(queue); // unnecessary with shared memory since ftruncate already gives zero-ed bytes
+  //calm_seq_lock_init(queue); // unnecessary with shared memory since ftruncate already gives zero-ed bytes
 
   my_struct entry;
   memset(&entry, 0, sizeof(entry));
@@ -29,7 +29,7 @@ int main()
 
   while (run)
   {
-    opt_queue_write(queue, entry);
+    calm_seq_lock_write(queue, entry);
       for (int i=0; i<50; ++i)
       {
         ++(entry.data[i].ii);
@@ -40,7 +40,7 @@ int main()
     //usleep(3 * 1000);
   }
 
-  ipc_unmap((void*)queue, sizeof(opt_queue));
+  ipc_unmap((void*)queue, sizeof(calm_seq_lock));
 
   return 0;
 }

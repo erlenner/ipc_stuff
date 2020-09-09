@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <signal.h>
 
-#include "opt_queue.h"
+#include "calm_seq_lock.h"
 #include "ipc.h"
 #include "debug.h"
 
@@ -16,8 +16,8 @@ void sig_handler(int sig)
 
 int main()
 {
-  opt_queue_def(my_struct, 64) opt_queue;
-  opt_queue* queue = (opt_queue*)ipc_open("/ipc_test", sizeof(opt_queue));
+  calm_seq_lock_def(my_struct, 64) calm_seq_lock;
+  calm_seq_lock* queue = (calm_seq_lock*)ipc_open("/ipc_test", sizeof(calm_seq_lock));
   debug_assert(queue != NULL, return -1);
 
   signal(SIGINT, sig_handler);
@@ -32,7 +32,7 @@ int main()
     static int last_seq = 0;
     int seq = 0;
 
-    opt_queue_read(queue, entry, seq);
+    calm_seq_lock_read(queue, entry, seq);
 
     if (seq != last_seq)
     {
@@ -58,7 +58,7 @@ int main()
     //usleep(3 * 1000);
   }
 
-  ipc_unmap((void*)queue, sizeof(opt_queue));
+  ipc_unmap((void*)queue, sizeof(calm_seq_lock));
 
   return 0;
 }
