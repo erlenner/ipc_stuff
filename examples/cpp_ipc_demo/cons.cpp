@@ -32,7 +32,9 @@ int main()
 
     if (seq != last_seq)
     {
-      printf("niew entry:\t");
+      last_seq = seq;
+
+      printf("new entry:\t");
       my_struct_print(printf, entry, "\n");
     }
 
