@@ -11,65 +11,31 @@ file(GLOB HEADERS "include/ipc/*.h")
 install(FILES ${HEADERS} DESTINATION "include/ipc")
 
 
-add_executable(ring_queue_prod examples/ring_queue_demo/prod.c)
-target_link_libraries(ring_queue_prod -lrt)
-install(TARGETS ring_queue_prod DESTINATION bin)
+file(GLOB EXAMPLES "examples/*")
 
-add_executable(ring_queue_cons examples/ring_queue_demo/cons.c)
-target_link_libraries(ring_queue_cons -lrt)
-install(TARGETS ring_queue_cons DESTINATION bin)
+foreach(example ${EXAMPLES})
+  execute_process(COMMAND bash "-c" "basename -z ${example}" OUTPUT_VARIABLE example_name)
+  #message("example_name: ${example_name}")
 
+  file(GLOB example_targets "${example}/*.c*")
+  foreach(target ${example_targets})
+    execute_process(COMMAND bash "-c" "basename -z -s .cpp ${target} | cut -z -f 1 -d '.'" OUTPUT_VARIABLE target_name)
+    #message("${target}: ${target_name}")
+    set(example_target "${example_name}_${target_name}")
 
-add_executable(ring_queue_cache_prod examples/ring_queue_cache_demo/prod.c)
-target_link_libraries(ring_queue_cache_prod -lrt)
-install(TARGETS ring_queue_cache_prod DESTINATION bin)
+    add_executable(${example_target} EXCLUDE_FROM_ALL ${target})
+    target_link_libraries(${example_target} -lrt)
+    install(TARGETS ${example_target} DESTINATION bin OPTIONAL)
 
-add_executable(ring_queue_cache_cons examples/ring_queue_cache_demo/cons.c)
-target_link_libraries(ring_queue_cache_cons -lrt)
-install(TARGETS ring_queue_cache_cons DESTINATION bin)
+    set(EXAMPLE_NAMES "${EXAMPLE_NAMES}${example_target};")
+    set(EXAMPLE_FILES "${EXAMPLE_FILES}${target};")
+  endforeach()
 
+endforeach()
+#message("example names: ${EXAMPLE_NAMES}")
+#message("example files: ${EXAMPLE_FILES}")
 
-add_executable(big_seq_lock_prod examples/big_seq_lock_demo/prod.c)
-target_link_libraries(big_seq_lock_prod -lrt)
-install(TARGETS big_seq_lock_prod DESTINATION bin)
-
-add_executable(big_seq_lock_cons examples/big_seq_lock_demo/cons.c)
-target_link_libraries(big_seq_lock_cons -lrt)
-install(TARGETS big_seq_lock_cons DESTINATION bin)
-
-
-add_executable(seq_lock_prod examples/seq_lock_demo/prod.c)
-target_link_libraries(seq_lock_prod -lrt)
-install(TARGETS seq_lock_prod DESTINATION bin)
-
-add_executable(seq_lock_cons examples/seq_lock_demo/cons.c)
-target_link_libraries(seq_lock_cons -lrt)
-install(TARGETS seq_lock_cons DESTINATION bin)
-
-
-add_executable(cpp_seq_lock_prod examples/cpp_seq_lock_demo/prod.cpp)
-target_link_libraries(cpp_seq_lock_prod -lrt)
-install(TARGETS cpp_seq_lock_prod DESTINATION bin)
-
-add_executable(cpp_seq_lock_cons examples/cpp_seq_lock_demo/cons.cpp)
-target_link_libraries(cpp_seq_lock_cons -lrt)
-install(TARGETS cpp_seq_lock_cons DESTINATION bin)
-
-
-add_executable(cpp_big_seq_lock_prod examples/cpp_big_seq_lock_demo/prod.cpp)
-target_link_libraries(cpp_big_seq_lock_prod -lrt)
-install(TARGETS cpp_big_seq_lock_prod DESTINATION bin)
-
-add_executable(cpp_big_seq_lock_cons examples/cpp_big_seq_lock_demo/cons.cpp)
-target_link_libraries(cpp_big_seq_lock_cons -lrt)
-install(TARGETS cpp_big_seq_lock_cons DESTINATION bin)
-
-
-
-add_executable(cpp_ipc_prod examples/cpp_ipc_demo/prod.cpp)
-target_link_libraries(cpp_ipc_prod -lrt)
-install(TARGETS cpp_ipc_prod DESTINATION bin)
-
-add_executable(cpp_ipc_cons examples/cpp_ipc_demo/cons.cpp)
-target_link_libraries(cpp_ipc_cons -lrt)
-install(TARGETS cpp_ipc_cons DESTINATION bin)
+#add_custom_target(examples ALL)
+#add_custom_target(examples DEPENDS ${HEADERS})
+add_custom_target(examples)
+add_dependencies(examples ${EXAMPLE_NAMES})
