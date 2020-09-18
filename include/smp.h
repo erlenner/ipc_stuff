@@ -4,6 +4,8 @@
 #include <stdatomic.h>
 #endif
 
+#pragma GCC diagnostic ignored "-Wcomment"
+#pragma GCC diagnostic push
 
 #define barrier() __asm__ __volatile__("": : :"memory")
 
@@ -81,3 +83,5 @@
 //  smp_mb();                       \
 //  WRITE_ONCE(p, v);               \
 //} while (0)
+
+#pragma GCC diagnostic pop

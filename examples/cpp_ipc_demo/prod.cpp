@@ -15,9 +15,9 @@ void sig_handler(int sig)
 
 int main()
 {
-  //ipc_sender<my_struct> topic("/my_topic");
-  ipc_sender<my_struct> topic;
-  debug_assert(topic.init("/my_topic") == 0, return -1);
+  //ipc_writer<my_struct> writer("/my_topic");
+  ipc_writer<my_struct> writer;
+  debug_assert(writer.init("/my_topic") == 0, return -1);
 
   my_struct entry;
   memset(&entry, 0, sizeof(entry));
@@ -26,7 +26,7 @@ int main()
 
   while (run)
   {
-    topic.write(entry);
+    writer.write(entry);
 
     for (int i=0; i<50; ++i)
     {

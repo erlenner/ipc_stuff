@@ -60,7 +60,8 @@ int main()
     if ((rand() % 1000) == 0) usleep((rand() % 10) * 1000);
   }
 
-  debug("read_index: %d write_index: %d entry: %d\n", queue->read_index, queue->write_index, entry);
+  debug("read_index: %d write_index: %d entry: ", queue->read_index, queue->write_index);
+  my_struct_print(printf, entry, "\n");
 
   shmem_unmap((void*)queue, sizeof(ring_queue));
 
