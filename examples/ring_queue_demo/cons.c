@@ -4,7 +4,7 @@
 #include <time.h>
 
 #include "ring_queue.h"
-#include "ipc.h"
+#include "shmem.h"
 #include "debug.h"
 
 #include "my_struct.h"
@@ -20,7 +20,7 @@ void sig_handler(int sig)
 
 int main()
 {
-  ring_queue* queue = (ring_queue*)ipc_open("/ipc_test", sizeof(ring_queue));
+  ring_queue* queue = (ring_queue*)shmem_open("/shmem_test", sizeof(ring_queue));
   debug_assert(queue != NULL, return -1);
 
   debug("read_index: %d write_index: %d\n", queue->read_index, queue->write_index);
@@ -62,7 +62,7 @@ int main()
 
   debug("read_index: %d write_index: %d entry: %d\n", queue->read_index, queue->write_index, entry);
 
-  ipc_unmap((void*)queue, sizeof(ring_queue));
+  shmem_unmap((void*)queue, sizeof(ring_queue));
 
   return 0;
 }

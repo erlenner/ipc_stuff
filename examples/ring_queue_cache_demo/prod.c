@@ -4,7 +4,7 @@
 #include <time.h>
 
 #include "ring_queue.h"
-#include "ipc.h"
+#include "shmem.h"
 #include "debug.h"
 
 #include "my_struct.h"
@@ -20,7 +20,7 @@ void sig_handler(int sig)
 
 int main()
 {
-  ring_queue* queue = (ring_queue*)ipc_create("/ipc_test", sizeof(ring_queue));
+  ring_queue* queue = (ring_queue*)shmem_create("/shmem_test", sizeof(ring_queue));
   debug_assert(queue != NULL, return -1);
   //ring_queue_init(queue); // unnecessary with shared memory since ftruncate already gives zero-ed bytes
 
@@ -53,7 +53,7 @@ int main()
 
   debug("read_index: %d write_index: %d\n", queue->read_index, queue->write_index);
 
-  ipc_unmap((void*)queue, sizeof(ring_queue));
+  shmem_unmap((void*)queue, sizeof(ring_queue));
 
   return 0;
 }

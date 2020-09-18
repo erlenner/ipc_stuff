@@ -2,7 +2,7 @@
 #include <signal.h>
 
 #include "seq_lock.h"
-#include "ipc.h"
+#include "shmem.h"
 #include "debug.h"
 
 #include "my_struct.h"
@@ -17,7 +17,7 @@ void sig_handler(int sig)
 int main()
 {
   seq_lock_def(my_struct) seq_lock;
-  seq_lock* lock = (seq_lock*)ipc_open("/ipc_test", sizeof(seq_lock));
+  seq_lock* lock = (seq_lock*)shmem_open("/shmem_test", sizeof(seq_lock));
   debug_assert(lock != NULL, return -1);
 
   signal(SIGINT, sig_handler);
@@ -59,7 +59,7 @@ int main()
     //usleep(3 * 1000);
   }
 
-  ipc_unmap((void*)lock, sizeof(seq_lock));
+  shmem_unmap((void*)lock, sizeof(seq_lock));
 
   return 0;
 }

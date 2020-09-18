@@ -2,7 +2,7 @@
 #include <signal.h>
 
 #include "seq_lock.h"
-#include "ipc.h"
+#include "shmem.h"
 #include "debug.h"
 
 #include "my_struct.h"
@@ -18,7 +18,7 @@ int main()
 {
   seq_lock_def(my_struct) seq_lock;
 
-  seq_lock* lock = (seq_lock*)ipc_create("/ipc_test", sizeof(seq_lock));
+  seq_lock* lock = (seq_lock*)shmem_create("/shmem_test", sizeof(seq_lock));
   debug_assert(lock != NULL, return -1);
   //seq_lock_init(lock); // unnecessary with shared memory since ftruncate already gives zero-ed bytes
 
@@ -41,7 +41,7 @@ int main()
     //usleep(1 * 100);
   }
 
-  ipc_unmap((void*)lock, sizeof(seq_lock));
+  shmem_unmap((void*)lock, sizeof(seq_lock));
 
   return 0;
 }
