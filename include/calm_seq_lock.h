@@ -116,6 +116,7 @@ do {                                                                            
 template<typename STORAGE, int SIZE>
 class calm_seq_lock
 {
+  static_assert((SIZE & (SIZE - 1)) == 0, "SIZE not binary exponent (2^n)");  \
   int write_index;                                                          \
   int seq;                                                                  \
   char padding[CACHELINE_BYTES - 2*sizeof(int)];                            \

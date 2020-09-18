@@ -26,13 +26,12 @@ int main()
   while (run)
   {
     my_struct entry;
-    static my_struct last_entry;
-    memset(&last_entry, 0, sizeof(last_entry));
+
+    int seq = lock->read(entry);
 
     static int last_seq = 0;
-    int seq = 0;
-
-    seq = lock->read(entry);
+    static my_struct last_entry;
+    memset(&last_entry, 0, sizeof(last_entry));
 
     if (seq != last_seq)
     {
