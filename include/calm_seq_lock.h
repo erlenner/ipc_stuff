@@ -128,7 +128,7 @@ class calm_seq_lock
   } buffer[SIZE];                                                           \
 
 public:
-  int write(STORAGE entry)
+  int write(const STORAGE& entry)
   {
     calm_seq_lock_write(this, entry);
     return 0;
@@ -140,6 +140,8 @@ public:
     calm_seq_lock_read(this, entry, seq);
     return seq;
   }
+
+  typedef STORAGE storage;
 
 } __attribute__ ((aligned(CACHELINE_BYTES)));
 #endif

@@ -96,7 +96,7 @@ class seq_lock
   STORAGE entry;
 
 public:
-  int write(STORAGE entry)
+  int write(const STORAGE& entry)
   {
     seq_lock_write(this, entry);
     return 0;
@@ -108,6 +108,8 @@ public:
     seq_lock_read(this, entry, seq);
     return seq;
   }
+
+  typedef STORAGE storage;
 
 } __attribute__ ((aligned(CACHELINE_BYTES)));
 

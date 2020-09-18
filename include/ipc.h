@@ -63,3 +63,36 @@ static inline int ipc_unmap(void *addr, int size)
 
   return 0;
 }
+
+#ifdef __cplusplus
+template<typename DATA_STRUCTURE, int SIZE>
+class ipc_data
+{
+  DATA_STRUCTURE *ds;
+  typedef typename DATA_STRUCTURE::storage storage;
+
+public:
+
+  ipc_data(const char* id)
+  {
+    init(id);
+  }
+
+  int init(const char* id)
+  {
+    ds = (DATA_STRUCTURE*)ipc_create(id, sizeof(DATA_STRUCTURE));
+    return (ds == NULL) ? 1 : 0;
+  }
+
+  int write(const storage& entry)
+  {
+    return ds->write(entry);
+  }
+
+  int read(const storage& entry)
+  {
+    return ds->read(entry);
+  }
+
+} __attribute__ ((aligned(CACHELINE_BYTES)));
+#endif
