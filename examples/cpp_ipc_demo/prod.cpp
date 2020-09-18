@@ -27,15 +27,17 @@ int main()
   while (run)
   {
     topic.write(entry);
+
     for (int i=0; i<50; ++i)
     {
       ++(entry.data[i].ii);
       ++(entry.data[i].iii);
       ++(entry.data[i].iiii);
     }
-    //debug("entry: %d\n", entry);
-    //my_struct_print(printf, entry, "\n");
-    //usleep(1 * 100);
+    debug("sending entry:\t");
+    my_struct_print(printf, entry, "\n");
+
+    usleep(1 * 1000);
   }
 
   return 0;
