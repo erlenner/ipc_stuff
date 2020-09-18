@@ -1,5 +1,5 @@
 /*
-calm_seq_lock.h
+big_seq_lock.h
 
 Modification of seq_lock.h.
 Supports non-stop writing at the cost of taking up more space
@@ -15,7 +15,7 @@ https://github.com/rigtorp/Seqlock
 #include "smp.h"
 
 
-#define calm_seq_lock_def(STORAGE, SIZE)\
+#define big_seq_lock_def(STORAGE, SIZE)\
 static_assert((SIZE & (SIZE - 1)) == 0, "SIZE not binary exponent (2^n)");  \
 typedef struct                                                              \
 {                                                                           \
@@ -32,9 +32,9 @@ typedef struct                                                              \
 } __attribute__ ((aligned(CACHELINE_BYTES)))
 
 
-#define calm_seq_lock_size(lock) (sizeof((lock)->buffer) / sizeof((lock)->buffer[0]))
+#define big_seq_lock_size(lock) (sizeof((lock)->buffer) / sizeof((lock)->buffer[0]))
 
-#define calm_seq_lock_init(lock)                               \
+#define big_seq_lock_init(lock)                               \
 do {                                                            \
   memset(lock, 0, sizeof(lock));                              \
 } while (0)
@@ -47,17 +47,17 @@ do {                                                            \
 
 /*
 parameters:
-_lock (in): pointer to object defined by calm_seq_lock_def
-_entry (in): instance of STORAGE object passed to calm_seq_lock_def
+_lock (in): pointer to object defined by big_seq_lock_def
+_entry (in): instance of STORAGE object passed to big_seq_lock_def
 */
-#define calm_seq_lock_write(_lock, _entry)                                         \
+#define big_seq_lock_write(_lock, _entry)                                         \
 do {                                                                                \
   typeof(_lock) const q = _lock;                                                  \
                                                                                     \
   int seq = (q)->seq;                                                               \
                                                                                     \
   int wi = smp_load_acquire(q->write_index);                                        \
-  wi = next_index(wi, calm_seq_lock_size(q));                                       \
+  wi = next_index(wi, big_seq_lock_size(q));                                       \
                                                                                     \
   (q)->buffer[wi].seq = ++seq;                                                      \
   smp_wmb();                                                                        \
@@ -74,11 +74,11 @@ do {                                                                            
 
 /*
 parameters:
-_lock (in): pointer to object defined by calm_seq_lock_def
-_entry (out): instance of STORAGE object passed to calm_seq_lock_def
+_lock (in): pointer to object defined by big_seq_lock_def
+_entry (out): instance of STORAGE object passed to big_seq_lock_def
 outout code (out, optional): integer representing the sequence number of the read entry
 */
-#define calm_seq_lock_read(_lock, _entry, .../*seq2*/)                             \
+#define big_seq_lock_read(_lock, _entry, .../*seq2*/)                             \
 do {                                                                                \
   typeof(_lock) const q = _lock;                                                  \
                                                                                     \
@@ -114,7 +114,7 @@ do {                                                                            
 
 #ifdef __cplusplus
 template<typename STORAGE, int SIZE>
-class calm_seq_lock
+class big_seq_lock
 {
   static_assert((SIZE & (SIZE - 1)) == 0, "SIZE not binary exponent (2^n)");  \
   int write_index;                                                          \
@@ -130,14 +130,14 @@ class calm_seq_lock
 public:
   int write(const STORAGE& entry)
   {
-    calm_seq_lock_write(this, entry);
+    big_seq_lock_write(this, entry);
     return 0;
   }
 
   int read(STORAGE& entry)
   {
     int seq;
-    calm_seq_lock_read(this, entry, seq);
+    big_seq_lock_read(this, entry, seq);
     return seq;
   }
 

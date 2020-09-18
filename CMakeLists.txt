@@ -27,13 +27,13 @@ target_link_libraries(ring_queue_cache_cons -lrt)
 install(TARGETS ring_queue_cache_cons DESTINATION bin)
 
 
-add_executable(calm_seq_lock_prod examples/calm_seq_lock_demo/prod.c)
-target_link_libraries(calm_seq_lock_prod -lrt)
-install(TARGETS calm_seq_lock_prod DESTINATION bin)
+add_executable(big_seq_lock_prod examples/big_seq_lock_demo/prod.c)
+target_link_libraries(big_seq_lock_prod -lrt)
+install(TARGETS big_seq_lock_prod DESTINATION bin)
 
-add_executable(calm_seq_lock_cons examples/calm_seq_lock_demo/cons.c)
-target_link_libraries(calm_seq_lock_cons -lrt)
-install(TARGETS calm_seq_lock_cons DESTINATION bin)
+add_executable(big_seq_lock_cons examples/big_seq_lock_demo/cons.c)
+target_link_libraries(big_seq_lock_cons -lrt)
+install(TARGETS big_seq_lock_cons DESTINATION bin)
 
 
 add_executable(seq_lock_prod examples/seq_lock_demo/prod.c)
@@ -54,13 +54,13 @@ target_link_libraries(cpp_seq_lock_cons -lrt)
 install(TARGETS cpp_seq_lock_cons DESTINATION bin)
 
 
-add_executable(cpp_calm_seq_lock_prod examples/cpp_calm_seq_lock_demo/prod.cpp)
-target_link_libraries(cpp_calm_seq_lock_prod -lrt)
-install(TARGETS cpp_calm_seq_lock_prod DESTINATION bin)
+add_executable(cpp_big_seq_lock_prod examples/cpp_big_seq_lock_demo/prod.cpp)
+target_link_libraries(cpp_big_seq_lock_prod -lrt)
+install(TARGETS cpp_big_seq_lock_prod DESTINATION bin)
 
-add_executable(cpp_calm_seq_lock_cons examples/cpp_calm_seq_lock_demo/cons.cpp)
-target_link_libraries(cpp_calm_seq_lock_cons -lrt)
-install(TARGETS cpp_calm_seq_lock_cons DESTINATION bin)
+add_executable(cpp_big_seq_lock_cons examples/cpp_big_seq_lock_demo/cons.cpp)
+target_link_libraries(cpp_big_seq_lock_cons -lrt)
+install(TARGETS cpp_big_seq_lock_cons DESTINATION bin)
 
 
 

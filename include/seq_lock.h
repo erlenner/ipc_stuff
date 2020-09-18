@@ -1,7 +1,7 @@
 /*
 seq_lock.h
 
-Use calm_seq_lock.h if non-stop writing is needed
+Use big_seq_lock.h if non-stop writing is needed
 
 Inspired by:
 http://www.1024cores.net/home/lock-free-algorithms/reader-writer-problem/improved-lock-free-seqlock

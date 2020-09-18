@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <signal.h>
 
-#include "calm_seq_lock.h"
+#include "big_seq_lock.h"
 #include "shmem.h"
 #include "debug.h"
 
@@ -16,8 +16,8 @@ void sig_handler(int sig)
 
 int main()
 {
-  calm_seq_lock_def(my_struct, 64) calm_seq_lock;
-  calm_seq_lock* lock = (calm_seq_lock*)shmem_open("/shmem_test", sizeof(calm_seq_lock));
+  big_seq_lock_def(my_struct, 64) big_seq_lock;
+  big_seq_lock* lock = (big_seq_lock*)shmem_open("/shmem_test", sizeof(big_seq_lock));
   debug_assert(lock != NULL, return -1);
 
   signal(SIGINT, sig_handler);
@@ -32,7 +32,7 @@ int main()
     static int last_seq = 0;
     int seq = 0;
 
-    calm_seq_lock_read(lock, entry, seq);
+    big_seq_lock_read(lock, entry, seq);
 
     if (seq != last_seq)
     {
@@ -58,7 +58,7 @@ int main()
     //usleep(3 * 1000);
   }
 
-  shmem_unmap((void*)lock, sizeof(calm_seq_lock));
+  shmem_unmap((void*)lock, sizeof(big_seq_lock));
 
   return 0;
 }

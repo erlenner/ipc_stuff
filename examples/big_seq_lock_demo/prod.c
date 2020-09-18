@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <signal.h>
 
-#include "calm_seq_lock.h"
+#include "big_seq_lock.h"
 #include "shmem.h"
 #include "debug.h"
 
@@ -16,11 +16,11 @@ void sig_handler(int sig)
 
 int main()
 {
-  calm_seq_lock_def(my_struct, 64) calm_seq_lock;
+  big_seq_lock_def(my_struct, 64) big_seq_lock;
 
-  calm_seq_lock* lock = (calm_seq_lock*)shmem_create("/shmem_test", sizeof(calm_seq_lock));
+  big_seq_lock* lock = (big_seq_lock*)shmem_create("/shmem_test", sizeof(big_seq_lock));
   debug_assert(lock != NULL, return -1);
-  //calm_seq_lock_init(lock); // unnecessary with shared memory since ftruncate already gives zero-ed bytes
+  //big_seq_lock_init(lock); // unnecessary with shared memory since ftruncate already gives zero-ed bytes
 
   my_struct entry;
   memset(&entry, 0, sizeof(entry));
@@ -29,7 +29,7 @@ int main()
 
   while (run)
   {
-    calm_seq_lock_write(lock, entry);
+    big_seq_lock_write(lock, entry);
       for (int i=0; i<50; ++i)
       {
         ++(entry.data[i].ii);
@@ -40,7 +40,7 @@ int main()
     //usleep(3 * 1000);
   }
 
-  shmem_unmap((void*)lock, sizeof(calm_seq_lock));
+  shmem_unmap((void*)lock, sizeof(big_seq_lock));
 
   return 0;
 }

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <signal.h>
 
-#include "calm_seq_lock.h"
+#include "big_seq_lock.h"
 #include "shmem.h"
 #include "debug.h"
 
@@ -16,7 +16,7 @@ void sig_handler(int sig)
 
 int main()
 {
-  typedef calm_seq_lock<my_struct, 64> sl;
+  typedef big_seq_lock<my_struct, 64> sl;
   sl* lock = (sl*)shmem_open("/shmem_test", sizeof(sl));
   debug_assert(lock != NULL, return -1);
 
