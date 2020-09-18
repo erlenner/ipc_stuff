@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <signal.h>
 
-#include "seq_lock.h"
-#include "shmem.h"
-#include "debug.h"
+#include "ipc/seq_lock.h"
+#include "ipc/shmem.h"
+#include "ipc/debug.h"
 
 #include "my_struct.h"
 

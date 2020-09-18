@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <signal.h>
 
-#include "ipc.h"
-#include "debug.h"
+#include "ipc/ipc.h"
+#include "ipc/debug.h"
 
 #include "my_struct.h"
 

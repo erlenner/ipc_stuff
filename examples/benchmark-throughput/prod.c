@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <signal.h>
 
-#include "ring_queue.h"
-#include "shmem.h"
-#include "debug.h"
-#include "ms.h"
+#include "ipc/ring_queue.h"
+#include "ipc/shmem.h"
+#include "ipc/debug.h"
+#include "ipc/ms.h"
 
 ring_queue_def(int, 64) ring_queue;
 

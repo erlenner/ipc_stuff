@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "msg.h"
+#include "ipc/msg.h"
 
 int main()
 {

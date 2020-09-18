@@ -1,11 +1,15 @@
 # CMakeLists.txt
 cmake_minimum_required (VERSION 3.5.1)
-project (icp)
+project (ipc)
 
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -Wall")
 
 include_directories(include)
+
+file(GLOB HEADERS "include/ipc/*.h")
+install(FILES ${HEADERS} DESTINATION "include/ipc")
+
 
 add_executable(ring_queue_prod examples/ring_queue_demo/prod.c)
 target_link_libraries(ring_queue_prod -lrt)

@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "ring_queue.h"
-#include "shmem.h"
-#include "debug.h"
+#include "ipc/ring_queue.h"
+#include "ipc/shmem.h"
+#include "ipc/debug.h"
 
 #include "my_struct.h"
 
