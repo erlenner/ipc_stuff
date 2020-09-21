@@ -15,9 +15,9 @@ void sig_handler(int sig)
 
 int main()
 {
-  //ipc_reader<my_struct> reader("/my_topic");
+  //ipc_reader<my_struct> reader("my_topic");
   ipc_reader<my_struct> reader;
-  debug_assert(reader.init("/my_topic") == 0, return -1);
+  debug_assert(reader.init("my_topic") == 0, return -1);
 
   signal(SIGINT, sig_handler);
 
