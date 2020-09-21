@@ -1,3 +1,6 @@
+#pragma once
+#include <dirent.h>
+
 #include "shmem.h"
 #include "seq_lock.h"
 #include "big_seq_lock.h"
@@ -23,7 +26,28 @@ using ipc_reader = shmem_data<seq_lock<STORAGE>, false, ipc_shmem_prefix>;
 
 
 
-#include <dirent.h>
+int ipc_startup(pid_t *pids, const char ** children, int n_children)
+{
+  for (int i=0; i < n_children; ++i)
+  {
+    pid_t pid = fork();
+
+    debug_assert(pid != -1, return -1);
+
+    if (pid == 0)
+    {
+      debug_error("child of %u with pid %u\n", getppid(), getpid());
+
+      char * const child_argv[] = { (char*)children[i], NULL };
+      execv(children[i], child_argv);
+    }
+
+    debug_error("parent of %u : %u\n", pid, getpid());
+    pids[i] = pid;
+  }
+
+  return 0;
+}
 
 int ipc_cleanup()
 {
