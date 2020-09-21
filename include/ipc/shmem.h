@@ -43,7 +43,7 @@ static inline void* shmem_open(const char* storage_id, int size)
   return addr;
 }
 
-static inline int shmem_destroy(const char* storage_id)
+static inline int shmem_unlink(const char* storage_id)
 {
   int res;
 
@@ -65,7 +65,8 @@ static inline int shmem_unmap(void *addr, int size)
 }
 
 #ifdef __cplusplus
-template<typename DATA_STRUCTURE, bool CREATE>
+constexpr char shmem_default_prefix[] = "shmem";
+template<typename DATA_STRUCTURE, bool WRITER, const char* PREFIX = shmem_default_prefix>
 class shmem_data
 {
   DATA_STRUCTURE *ds;
@@ -75,17 +76,20 @@ public:
 
   shmem_data() : ds(NULL) {}
 
-  shmem_data(const char* id)
+  shmem_data(const char id[])
   {
     init(id);
   }
 
-  int init(const char* id)
+  int init(const char id[])
   {
-    if (CREATE)
-      ds = (DATA_STRUCTURE*)shmem_create(id, sizeof(DATA_STRUCTURE));
+    char handle[sizeof(PREFIX) + sizeof(id)];
+    sprintf(handle, "%s_%s", PREFIX, id);
+
+    if (WRITER)
+      ds = (DATA_STRUCTURE*)shmem_create(handle, sizeof(DATA_STRUCTURE));
     else
-      ds = (DATA_STRUCTURE*)shmem_open(id, sizeof(DATA_STRUCTURE));
+      ds = (DATA_STRUCTURE*)shmem_open(handle, sizeof(DATA_STRUCTURE));
     return (ds == NULL) ? 1 : 0;
   }
 
@@ -99,11 +103,13 @@ public:
 
   int write(const storage& entry)
   {
+    static_assert(WRITER, "not a writer");
     return ds->write(entry);
   }
 
   int read(storage& entry)
   {
+    static_assert(!WRITER, "not a reader");
     return ds->read(entry);
   }
 
