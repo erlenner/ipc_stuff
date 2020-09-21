@@ -52,10 +52,11 @@ int main()
     child_pids[i] = pid;
   }
 
-  debug_error("done spawning threads: ");
+  #define MAX_PID_STRING_SIZE 20
+  char pids_string[MAX_PID_STRING_SIZE * n_children] = {'\0'};
   for (int i=0; i < n_children; ++i)
-    error("%u ", child_pids[i]);
-  error("\n");
+    sprintf(pids_string, "%s %u", pids_string, child_pids[i]);
+  debug_error("done spawning threads: %s\n", pids_string);
 
   signal(SIGINT, sig_handler);
   while (run)

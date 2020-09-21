@@ -76,20 +76,18 @@ public:
 
   shmem_data() : ds(NULL) {}
 
-  shmem_data(const char id[])
+  shmem_data(const char *id)
   {
     init(id);
   }
 
-  int init(const char id[])
+  int init(const char *id)
   {
-    char handle[sizeof(PREFIX) + sizeof(id)];
+    char handle[sizeof(PREFIX) + strlen(id)];
     sprintf(handle, "%s_%s", PREFIX, id);
 
-    if (WRITER)
-      ds = (DATA_STRUCTURE*)shmem_create(handle, sizeof(DATA_STRUCTURE));
-    else
-      ds = (DATA_STRUCTURE*)shmem_open(handle, sizeof(DATA_STRUCTURE));
+    ds = (DATA_STRUCTURE*)shmem_create(handle, sizeof(DATA_STRUCTURE));
+
     return (ds == NULL) ? 1 : 0;
   }
 
