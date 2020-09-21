@@ -28,12 +28,7 @@ int main()
   {
     writer.write(entry);
 
-    for (int i=0; i<50; ++i)
-    {
-      ++(entry.data[i].ii);
-      ++(entry.data[i].iii);
-      ++(entry.data[i].iiii);
-    }
+    my_struct_inc(entry);
     debug("sending entry:\t");
     my_struct_print(printf, entry, "\n");
 
