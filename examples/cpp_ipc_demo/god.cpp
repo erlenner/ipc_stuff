@@ -5,7 +5,7 @@
 #include "ipc/debug.h"
 
 
-constexpr char * const children[] =
+const char * const children[] =
 {
   "/usr/bin/cpp_ipc_demo_prod",
   "/usr/bin/cpp_ipc_demo_cons",
@@ -19,7 +19,7 @@ int run = 1;
 
 void sig_handler(int sig)
 {
-  debug_error("life signal\n");
+  debug_error("got signal %d\n", sig);
   for (int i=0; i < n_children; ++i)
     kill(child_pids[i], sig);
   run = 0;
@@ -29,7 +29,7 @@ int main()
 {
   pid_t pid;
 
-  debug_error("starting life\n");
+  debug_error("starting god\n");
 
 
 
@@ -44,7 +44,7 @@ int main()
     {
       debug_error("child of %u with pid %u\n", getppid(), getpid());
 
-      char * const child_argv[] = { children[i], NULL };
+      char * const child_argv[] = { (char*)children[i], NULL };
       execv(children[i], child_argv);
     }
 
@@ -52,8 +52,7 @@ int main()
     child_pids[i] = pid;
   }
 
-  #define MAX_PID_STRING_SIZE 20
-  char pids_string[MAX_PID_STRING_SIZE * n_children] = {'\0'};
+  char pids_string[20 * n_children] = {'\0'};
   for (int i=0; i < n_children; ++i)
     sprintf(pids_string, "%s %u", pids_string, child_pids[i]);
   debug_error("done spawning threads: %s\n", pids_string);
