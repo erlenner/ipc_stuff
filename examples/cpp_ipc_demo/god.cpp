@@ -28,7 +28,7 @@ child children[] =
   },
   {
     .name = "/usr/bin/cpp_ipc_demo_cons",
-    .restart = 1,
+    .restart = -1,
   },
 //===========================================================
 };
@@ -118,11 +118,6 @@ int main()
 
   for (int i=0; i < n_children; ++i)
     fork_child(children + i);
-
-  char pids_string[100 * n_children] = {'\0'};
-  for (int i=0; i < n_children; ++i)
-    sprintf(pids_string, "%s %u (%s)", pids_string, children[i].pid, children[i].name);
-  debug_error("done spawning threads: %s\n", pids_string);
 
   signal(SIGINT, exit_handler);
   signal(SIGCHLD, child_handler);
