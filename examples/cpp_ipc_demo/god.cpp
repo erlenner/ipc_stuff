@@ -101,7 +101,6 @@ void child_handler(int sig)
   c->alive = 0;
   debug_error("child %u (%s) exited with status %d\n", c->pid, c->name, status);
 
-  // TODO: move restart logic to main thread
   if (c->restart != 0)
   {
     debug_error("restarting child\n");
