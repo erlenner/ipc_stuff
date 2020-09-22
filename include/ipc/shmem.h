@@ -3,6 +3,7 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <dirent.h>
 
 #include "debug.h"
 
@@ -43,6 +44,16 @@ static inline void* shmem_open(const char* storage_id, int size)
   return addr;
 }
 
+static inline int shmem_unmap(void *addr, int size)
+{
+  int res;
+
+  res = munmap(addr, size);
+  debug_assert(res == 0, return -1);
+
+  return 0;
+}
+
 static inline int shmem_unlink(const char* storage_id)
 {
   int res;
@@ -54,13 +65,28 @@ static inline int shmem_unlink(const char* storage_id)
   return 0;
 }
 
-static inline int shmem_unmap(void *addr, int size)
+static inline int shmem_unlink_all(const char *prefix)
 {
-  int res;
+  DIR *dir;
+  struct dirent *ent;
+  dir = opendir("/dev/shm");
+  debug_assert(dir != NULL, return -1);
 
-  res = munmap(addr, size);
-  debug_assert(res == 0, return -1);
+  while(ent = readdir(dir))
+  {
+    const char *dir_name = ent->d_name;
+    int match = 1;
 
+    for (int i=0; i < strlen(prefix); ++i)
+      if (dir_name[i] != prefix[i])
+        match = 0;
+
+    if (match)
+    {
+      debug("unlinking %s\n", dir_name + strlen(prefix) + 1);
+      shmem_unlink(dir_name);
+    }
+  }
   return 0;
 }
 

@@ -8,15 +8,56 @@
 #include "ipc/debug.h"
 
 
-const char * child_names[] =
+
+typedef struct
 {
-  "/usr/bin/cpp_ipc_demo_prod",
-  "/usr/bin/cpp_ipc_demo_cons",
+  const char *name;
+  int restart = 0;  // -1 = infinite , 0 = never, 1 = once, 2 = twice, etc.
+
+// internal
+  pid_t pid;
+  int alive = 0;
+
+} child;
+
+child children[] =
+{
+//==================== FILL IN PROCESSES ====================
+  {
+    .name = "/usr/bin/cpp_ipc_demo_prod",
+  },
+  {
+    .name = "/usr/bin/cpp_ipc_demo_cons",
+    .restart = 1,
+  },
+//===========================================================
 };
 
-const int n_children = ARRAY_LENGTH(child_names);
+const int n_children = ARRAY_LENGTH(children);
 
-pid_t children[n_children];
+
+int fork_child(child *c)
+{
+  pid_t pid = fork();
+
+  debug_assert(pid != -1, return 1);
+
+  if (pid == 0)
+  {
+    debug_error("child %u (%s) was spawned by parent %u\n", getpid(), c->name, getppid());
+
+    setpgid(0, 0); // switch process group so ctrl-c only interrupts god
+
+    char * const child_argv[] = { (char*)(c->name), NULL };
+    execv(c->name, child_argv);
+  }
+
+  c->pid = pid;
+  c->alive = 1;
+  debug_error("parent %u spawned child %u (%s)\n", getpid(), c->pid, c->name);
+
+  return 0;
+}
 
 void exit_handler(int sig)
 {
@@ -26,68 +67,61 @@ void exit_handler(int sig)
   // kill the children manually, since they're in a different group
   signal(SIGCHLD, SIG_IGN);
   for (int i=0; i < n_children; ++i)
-    kill(children[i], sig);
+  {
+    if (children[i].alive)
+    {
+      debug_error("killing %u (%s)\n", children[i].pid, children[i].name);
+      debug_assert(kill(children[i].pid, sig) == 0);
+    }
+  }
 
   ipc_cleanup();
+
+  debug_error("exiting %u (god process) with status %d\n", getpid(), sig);
 
   exit(sig);
 }
 
 void child_handler(int sig)
 {
-  debug_assert(sig == SIGCHLD, return);
-  debug_error("Got SIGCHLD\n");
-
   pid_t pid;
   int status;
 
-  while (1)
+  for (pid_t tmp_pid; (tmp_pid = waitpid(-1, &status, WNOHANG)) > 0;)
+    pid = tmp_pid;
+
+  int child_index = -1;
+  for (int i = 0; i < n_children; ++i)
+    if (children[i].pid == pid)
+      child_index = i;
+
+  debug_assert(child_index != -1, return);
+  child *c = children + child_index;
+
+  c->alive = 0;
+  debug_error("child %u (%s) exited with status %d\n", c->pid, c->name, status);
+
+  // TODO: move restart logic to main thread
+  if (c->restart != 0)
   {
-    pid_t tmp_pid = waitpid(-1, &status, WNOHANG);
+    debug_error("restarting child\n");
+    fork_child(c);
 
-    debug_assert(tmp_pid != -1, return);
-
-    if (tmp_pid == 0)
-      break;
-    else
-      pid = tmp_pid;
+    if (c->restart > 0)
+      --c->restart;
   }
-
-  debug_error("child %u got killed with status %d\n", pid, status);
-
-  
 }
 
 int main()
 {
-  debug_error("starting god\n");
+  debug_error("starting %u (god process)\n", getpid());
 
-
-  //int res = ipc_startup(children, child_names, n_children);
-  //debug_assert(res == 0, return 1);
   for (int i=0; i < n_children; ++i)
-  {
-    pid_t pid = fork();
+    fork_child(children + i);
 
-    debug_assert(pid != -1, return 1);
-
-    if (pid == 0)
-    {
-      debug_error("child of %u with pid %u\n", getppid(), getpid());
-
-      setpgid(0, 0); // switch process group so ctrl-c only interrupts god
-
-      char * const child_argv[] = { (char*)child_names[i], NULL };
-      execv(child_names[i], child_argv);
-    }
-
-    debug_error("parent of %u : %u\n", pid, getpid());
-    children[i] = pid;
-  }
-
-  char pids_string[20 * n_children] = {'\0'};
+  char pids_string[100 * n_children] = {'\0'};
   for (int i=0; i < n_children; ++i)
-    sprintf(pids_string, "%s %u", pids_string, children[i]);
+    sprintf(pids_string, "%s %u (%s)", pids_string, children[i].pid, children[i].name);
   debug_error("done spawning threads: %s\n", pids_string);
 
   signal(SIGINT, exit_handler);
