@@ -12,11 +12,11 @@
 typedef struct
 {
   const char *name;
-  int restart = 0;  // -1 = infinite , 0 = never, 1 = once, 2 = twice, etc.
+  int restart;  // -1 = infinite , 0 = never, 1 = once, 2 = twice, etc.
 
 // internal
   pid_t pid;
-  int alive = 0;
+  int alive;
 
 } child;
 
@@ -33,7 +33,7 @@ child children[] =
 //===========================================================
 };
 
-const int n_children = ARRAY_LENGTH(children);
+#define n_children ARRAY_LENGTH(children)
 
 
 int fork_child(child *c)

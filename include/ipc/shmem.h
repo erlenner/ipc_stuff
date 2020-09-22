@@ -72,7 +72,7 @@ static inline int shmem_unlink_all(const char *prefix)
   dir = opendir("/dev/shm");
   debug_assert(dir != NULL, return -1);
 
-  while(ent = readdir(dir))
+  while((ent = readdir(dir)) != NULL)
   {
     const char *dir_name = ent->d_name;
     int match = 1;
