@@ -23,7 +23,16 @@
 //#define smp_wmb() smp_mb()
 //#define smp_rmb() smp_mb()
 
-#define cpu_relax() barrier()
+// https://patchwork.kernel.org/patch/1361581/
+#define cpu_relax()   do {  \
+  asm("nop");               \
+  asm("nop");               \
+  asm("nop");               \
+  asm("nop");               \
+  asm("nop");               \
+  smp_mb();                 \
+} while (0)
+//#define cpu_relax() barrier()
 
 #elif __x86_64__
 #define CACHELINE_BYTES 64
