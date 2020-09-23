@@ -92,41 +92,32 @@ do {                                                                            
   }                                                                                 \
 } while(0)
 
+#ifdef __cplusplus
+template<typename STORAGE, int SIZE>
+class ring_queue
+{
+  static_assert((SIZE & (SIZE - 1)) == 0, "SIZE not binary exponent (2^n)");  \
+  int read_index;                                                           \
+  char padding[CACHELINE_BYTES - sizeof(int)];                              \
+  int write_index;                                                          \
+  STORAGE buffer[SIZE];                                                     \
 
+public:
+  int write(const STORAGE& entry)
+  {
+    int err;
+    ring_queue_push(this, entry, err);
+    return err;
+  }
 
+  int read(STORAGE& entry)
+  {
+    int err;
+    ring_queue_eat(this, entry, err);
+    return err;
+  }
 
-#define ring_queue_cache_def(queue) typedef typeof(queue->buffer)
+  typedef STORAGE storage;
 
-#define ring_queue_eat_all(_queue, _cache, _nread)                                  \
-do {                                                                                \
-  typeof(_queue) const q = _queue;                                                  \
-  typeof(&(q->buffer[0])) c = _cache;                                               \
-                                                                                    \
-  const int wi = smp_load_acquire(q->write_index);                                  \
-  int ri = q->read_index;                                                           \
-                                                                                    \
-  if (ri == wi)                                                                     \
-    _nread = 0;                                                                     \
-  else                                                                              \
-  {                                                                                 \
-    const int ri_count = ri + 1;                                                    \
-    if (ri < wi)                                                                    \
-    {                                                                               \
-      _nread = wi-ri;                                                               \
-      memcpy(c, q->buffer + ri_count, _nread * sizeof(c[0]));                       \
-    }                                                                               \
-    else                                                                            \
-    {                                                                               \
-      const int wi_end_count = ring_queue_size(q) - ri_count;                       \
-      memcpy(c, q->buffer + ri_count, wi_end_count * sizeof(c[0]));                 \
-                                                                                    \
-      const int wi_count = wi + 1;                                                  \
-      memcpy(c + wi_end_count, q->buffer, wi_count * sizeof(c[0]));                 \
-                                                                                    \
-      _nread = wi_end_count + wi_count;                                             \
-    }                                                                               \
-                                                                                    \
-    ri = wi;                                                                        \
-    smp_store_release(q->read_index, ri);                                           \
-  }                                                                                 \
-} while(0)
+} __attribute__ ((aligned(CACHELINE_BYTES)));
+#endif

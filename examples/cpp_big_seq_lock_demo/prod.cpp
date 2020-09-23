@@ -20,7 +20,6 @@ int main()
 
   sl* lock = (sl*)shmem_create("/shmem_test", sizeof(sl));
   debug_assert(lock != NULL, return -1);
-  //big_seq_lock_init(lock); // unnecessary with shared memory since ftruncate already gives zero-ed bytes
 
   my_struct entry;
   memset(&entry, 0, sizeof(entry));

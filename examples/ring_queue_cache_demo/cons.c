@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "ipc/ring_queue.h"
+#include "ipc/ring_queue_cache.h"
 #include "ipc/shmem.h"
 #include "ipc/debug.h"
 

@@ -3,13 +3,11 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "ipc/ring_queue_cache.h"
+#include "ipc/ring_queue.h"
 #include "ipc/shmem.h"
 #include "ipc/debug.h"
 
 #include "my_struct.h"
-
-ring_queue_def(my_struct, 64) ring_queue;
 
 int run = 1;
 
@@ -20,9 +18,10 @@ void sig_handler(int sig)
 
 int main()
 {
-  ring_queue* queue = (ring_queue*)shmem_create("/shmem_test", sizeof(ring_queue));
+  typedef ring_queue<my_struct, 64> rq;
+
+  rq* queue = (rq*)shmem_create("/shmem_test", sizeof(rq));
   debug_assert(queue != NULL, return -1);
-  //ring_queue_init(queue); // unnecessary with shared memory since ftruncate already gives zero-ed bytes
 
   signal(SIGINT, sig_handler);
 
@@ -35,8 +34,8 @@ int main()
   {
 
     int err;
-    ring_queue_push(queue, entry, err);
-    debug_assert_v((err == 0), "entry: %d\tri: %d\twi: %d ", entry.data[0].ii, queue->read_index, queue->write_index);
+    err = queue->write(entry);
+    debug_assert_v((err == 0), "entry: %d ", entry.data[0].ii);
     if (err == 0)
     {
       for (int i=0; i<50; ++i)
@@ -46,14 +45,13 @@ int main()
         ++(entry.data[i].iiii);
       }
     }
-
-    usleep(3 * 1000);
+    //else
+    //  usleep(3 * 1000);
     //if ((rand() % 1000) == 0) usleep((rand() % 10) * 1000);
+    usleep(3 * 1000);
   }
 
-  debug("read_index: %d write_index: %d\n", queue->read_index, queue->write_index);
-
-  shmem_unmap((void*)queue, sizeof(ring_queue));
+  shmem_unmap((void*)queue, sizeof(rq));
 
   return 0;
 }
