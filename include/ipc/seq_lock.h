@@ -1,7 +1,7 @@
 /*
 seq_lock.h
 
-Use big_seq_lock.h if non-stop writing is needed
+Sequence lock: https://en.wikipedia.org/wiki/Seqlock, https://lwn.net/Articles/21355/
 
 Inspired by:
 http://www.1024cores.net/home/lock-free-algorithms/reader-writer-problem/improved-lock-free-seqlock

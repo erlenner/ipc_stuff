@@ -2,7 +2,8 @@
 big_seq_lock.h
 
 Modification of seq_lock.h.
-Supports non-stop writing at the cost of taking up more space
+Uses more space in exchange for less chance of collisions / retries in reader
+Supports single writer, multiple readers
 
 Inspired by:
 http://www.1024cores.net/home/lock-free-algorithms/reader-writer-problem/improved-lock-free-seqlock

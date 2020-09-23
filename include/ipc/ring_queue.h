@@ -1,5 +1,7 @@
 /*
 Ring Queue
+Fixed size
+Single producer, single consumer
 
 Inspired by:
 https://github.com/boostorg/lockfree/blob/develop/include/boost/lockfree/spsc_queue.hpp
