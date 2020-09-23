@@ -67,8 +67,6 @@ do {                                                                            
   smp_write_once((q)->buffer[wi].seq, ++seq);                                       \
                                                                                     \
   smp_store_release(q->write_index, wi);                                            \
-  /*smp_wmb();*/                                                                    \
-  /*(q)->write_index = wi;*/                                                        \
                                                                                     \
   (q)->seq = seq;                                                                   \
 } while(0)
@@ -85,13 +83,10 @@ do {                                                                            
                                                                                     \
   while(1)                                                                          \
   {                                                                                 \
-    /*static int total = 0;*/                                                       \
-    /*++total;*/                                                                    \
     const int wi = smp_load_acquire(q->write_index);                                \
     int seq1 = smp_read_once((q)->buffer[wi].seq);                                  \
     if (seq1 & 1)                                                                   \
     {                                                                               \
-      /*fprintf(stderr, "V");*/                                                     \
       continue;                                                                     \
     }                                                                               \
                                                                                     \
@@ -105,12 +100,8 @@ do {                                                                            
       OPT_SET(seq2, __VA_ARGS__)                                                    \
       break;                                                                        \
     }                                                                               \
-    /*static int fail = 0;*/                                                        \
-    /*fprintf(stderr, "\nFAILED: %d %d %f\n", ++fail, total, (total > 0) ? ((float)fail / (float)total) : 0);*/ \
   }                                                                                 \
                                                                                     \
-  /*fprintf(stderr, "i");*/                                                         \
-  /*printf("ok %d\n", _entry);*/                                                    \
 } while(0)
 
 #ifdef __cplusplus

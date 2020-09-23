@@ -65,7 +65,6 @@ do {                                                                            
   {                                                                                 \
     if (seq1 & 1)                                                                   \
     {                                                                               \
-      /*fprintf(stderr, "V");*/                                                     \
       cpu_relax();                                                                  \
       seq1 = smp_read_once((q)->seq);                                               \
       continue;                                                                     \
@@ -83,13 +82,8 @@ do {                                                                            
     }                                                                               \
                                                                                     \
     seq1 = seq2;                                                                    \
-                                                                                    \
-    /*static int fail = 0;*/                                                        \
-    /*fprintf(stderr, "\nFAILED: %d %d %f\n", ++fail, total, (total > 0) ? ((float)fail / (float)total) : 0);*/ \
   }                                                                                 \
                                                                                     \
-  /*fprintf(stderr, "i");*/                                                         \
-  /*printf("ok %d\n", _entry);*/                                                    \
 } while(0)
 
 #ifdef __cplusplus
