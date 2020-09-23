@@ -33,8 +33,7 @@ child children[] =
 //===========================================================
 };
 
-#define n_children (int)ARRAY_LENGTH(children)
-
+#define n_children (int)(sizeof(children) / sizeof(children[0]))
 
 int fork_child(child *c)
 {
