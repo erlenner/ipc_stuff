@@ -1,10 +1,27 @@
-#include <stdio.h>
 #include <signal.h>
+#include <sys/time.h>
 
 #include "ipc/ring_queue.h"
 #include "ipc/shmem.h"
 #include "ipc/debug.h"
-#include "ipc/ms.h"
+
+double ms()
+{
+  struct timeval tp;
+  gettimeofday(&tp, NULL);
+
+  double ms = (double)(tp.tv_sec)*1000 + (double)(tp.tv_usec)/1000;
+  return ms;
+}
+
+double toc(double* start)
+{
+  double now = ms();
+  double dt = now - *start;
+  *start = now;
+  debug("toc: %f\n", dt);
+  return dt;
+}
 
 ring_queue_def(int, 64) ring_queue;
 
@@ -36,7 +53,7 @@ int main()
     if (entry == 64)
       t = ms();
   }
-  ms_toc(&t);
+  toc(&t);
 
   debug("read_index: %d write_index: %d\n", queue->read_index, queue->write_index);
 
