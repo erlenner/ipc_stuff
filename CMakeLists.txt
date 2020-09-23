@@ -4,6 +4,7 @@ project (ipc)
 
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -O2 -Wall")
 
 include_directories(include)
 

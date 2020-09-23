@@ -77,7 +77,7 @@ static inline int shmem_unlink_all(const char *prefix)
     const char *dir_name = ent->d_name;
     int match = 1;
 
-    for (int i=0; i < strlen(prefix); ++i)
+    for (int i=0; i < (int)strlen(prefix); ++i)
       if (dir_name[i] != prefix[i])
         match = 0;
 
@@ -109,7 +109,7 @@ public:
 
   int init(const char *id)
   {
-    char handle[sizeof(PREFIX) + strlen(id)];
+    char handle[sizeof(PREFIX) + strlen(id) + 1];
     sprintf(handle, "%s_%s", PREFIX, id);
 
     ds = (DATA_STRUCTURE*)shmem_create(handle, sizeof(DATA_STRUCTURE));
