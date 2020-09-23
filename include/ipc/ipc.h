@@ -10,6 +10,7 @@ const char ipc_shmem_prefix[] = "ipc";
 // Standard seqlock / sequence lock (https://en.wikipedia.org/wiki/Seqlock)
 // Supports single producer, multiple consumers
 // Reader always gets the most recent entry, potentially skipping older entries
+// Consider using big_seq_lock / ipc_writer_bsl if write frequency exceeds 10kHz
 #include "seq_lock.h"
 template<typename STORAGE>
 using ipc_writer_sl = shmem_data<seq_lock<STORAGE>, true, ipc_shmem_prefix>;
@@ -18,7 +19,7 @@ using ipc_reader_sl = shmem_data<seq_lock<STORAGE>, false, ipc_shmem_prefix>;
 
 
 // Modified seqlock from http://www.1024cores.net/home/lock-free-algorithms/reader-writer-problem/improved-lock-free-seqlock
-// Functionally similar to the standard seqlock
+// Functionally similar to the standard seq_lock / ipc_writer_sl
 // Uses more space in exchange for less chance of collisions / retries in reader
 #include "big_seq_lock.h"
 template<typename STORAGE>
