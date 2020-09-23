@@ -41,11 +41,11 @@ do {                                                                            
                                                                                     \
   int seq = (q)->seq;                                                               \
                                                                                     \
-  (q)->seq = ++seq;                                                                 \
+  smp_write_once((q)->seq, ++seq);                                                  \
   smp_wmb();                                                                        \
   (q)->entry = _entry;                                                              \
   smp_wmb();                                                                        \
-  (q)->seq = ++seq;                                                                 \
+  smp_write_once((q)->seq, ++seq);                                                  \
                                                                                     \
 } while(0)
 
@@ -55,17 +55,19 @@ _lock (in): pointer to object defined by seq_lock_def
 _entry (out): instance of STORAGE object passed to seq_lock_def
 outout code (out, optional): integer representing the sequence number of the read entry
 */
-#define seq_lock_read(_lock, _entry, .../*seq2*/)                                  \
+#define seq_lock_read(_lock, _entry, .../*seq2*/)                                   \
 do {                                                                                \
-  typeof(_lock) const q = _lock;                                                  \
+  typeof(_lock) const q = _lock;                                                    \
+                                                                                    \
+  int seq1 = smp_read_once((q)->seq);                                               \
                                                                                     \
   while(1)                                                                          \
   {                                                                                 \
-    int seq1 = (q)->seq;                                                            \
     if (seq1 & 1)                                                                   \
     {                                                                               \
       /*fprintf(stderr, "V");*/                                                     \
       cpu_relax();                                                                  \
+      seq1 = smp_read_once((q)->seq);                                               \
       continue;                                                                     \
     }                                                                               \
                                                                                     \
@@ -73,12 +75,15 @@ do {                                                                            
     _entry = (q)->entry;                                                            \
     smp_rmb();                                                                      \
                                                                                     \
-    int seq2 = (q)->seq;                                                            \
+    int seq2 = smp_read_once((q)->seq);                                             \
     if (seq2 == seq1)                                                               \
     {                                                                               \
       OPT_SET(seq2, __VA_ARGS__)                                                    \
       break;                                                                        \
     }                                                                               \
+                                                                                    \
+    seq1 = seq2;                                                                    \
+                                                                                    \
     /*static int fail = 0;*/                                                        \
     /*fprintf(stderr, "\nFAILED: %d %d %f\n", ++fail, total, (total > 0) ? ((float)fail / (float)total) : 0);*/ \
   }                                                                                 \

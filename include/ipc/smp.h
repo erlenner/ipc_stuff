@@ -4,6 +4,8 @@
 #include <stdatomic.h>
 #endif
 
+// Symmetric multiprocessing helpers, using a mix of inline asm from the Linux kernel, and C11 atomics
+
 #define barrier() __asm__ __volatile__("": : :"memory")
 
 #if __arm__
@@ -34,9 +36,26 @@
 #endif
 
 #ifdef __cplusplus
-#define smp_load_acquire(p) std::atomic_load_explicit((std::atomic<typeof(p)>*)&p, std::memory_order_acquire)
-#define smp_store_release(p, v) std::atomic_store_explicit((std::atomic<typeof(p)>*)&p, v, std::memory_order_release)
+#define smp_load_acquire(x) std::atomic_load_explicit((std::atomic<typeof(x)>*)&x, std::memory_order_acquire)
+#define smp_store_release(x, val) std::atomic_store_explicit((std::atomic<typeof(x)>*)&x, val, std::memory_order_release)
 #else
-#define smp_load_acquire(p) atomic_load_explicit(&p, memory_order_acquire)
-#define smp_store_release(p, v) atomic_store_explicit(&p, v, memory_order_release)
+#define smp_load_acquire(x) atomic_load_explicit(&x, memory_order_acquire)
+#define smp_store_release(x, val) atomic_store_explicit(&x, val, memory_order_release)
 #endif
+
+
+
+// Variable accesses as per http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0124r5.html#Variable%20Access
+
+// KERNEL
+#define smp_read_once(x)  (*(const volatile typeof(x) *)&(x))
+#define smp_write_once(x, val) do { *(volatile typeof(x) *)&(x) = (val); } while (0)
+
+//// C11
+//#ifdef __cplusplus
+//#define smp_read_once(x)  (std::atomic_load_explicit((const volatile typeof(x) *)(&(x)), memory_order_relaxed))
+//#define smp_write_once(x, val) std::atomic_store_explicit((std::atomic<typeof(x)>*)(volatile typeof(x) *)(&(x)), val, std::memory_order_relaxed)
+//#else
+//#define smp_read_once(x)  ((atomic_load_explicit((const volatile typeof(x) *)(&(x)), memory_order_relaxed)))
+//#define smp_write_once(x, val) atomic_store_explicit((volatile typeof(x) *)(&(x)), val, memory_order_relaxed)
+//#endif
