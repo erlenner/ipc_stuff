@@ -50,20 +50,20 @@ parameters:
 _lock (in): pointer to object defined by big_seq_lock_def
 _entry (in): instance of STORAGE object passed to big_seq_lock_def
 */
-#define big_seq_lock_write(_lock, _entry)                                         \
+#define big_seq_lock_write(_lock, _entry)                                           \
 do {                                                                                \
-  typeof(_lock) const q = _lock;                                                  \
+  typeof(_lock) const q = _lock;                                                    \
                                                                                     \
   int seq = (q)->seq;                                                               \
                                                                                     \
   int wi = smp_load_acquire(q->write_index);                                        \
-  wi = next_index(wi, big_seq_lock_size(q));                                       \
+  wi = next_index(wi, big_seq_lock_size(q));                                        \
                                                                                     \
-  (q)->buffer[wi].seq = ++seq;                                                      \
+  smp_write_once((q)->buffer[wi].seq, ++seq);                                       \
   smp_wmb();                                                                        \
   (q)->buffer[wi].entry = _entry;                                                   \
   smp_wmb();                                                                        \
-  (q)->buffer[wi].seq = ++seq;                                                      \
+  smp_write_once((q)->buffer[wi].seq, ++seq);                                       \
                                                                                     \
   smp_store_release(q->write_index, wi);                                            \
   /*smp_wmb();*/                                                                    \
@@ -78,16 +78,16 @@ _lock (in): pointer to object defined by big_seq_lock_def
 _entry (out): instance of STORAGE object passed to big_seq_lock_def
 outout code (out, optional): integer representing the sequence number of the read entry
 */
-#define big_seq_lock_read(_lock, _entry, .../*seq2*/)                             \
+#define big_seq_lock_read(_lock, _entry, .../*seq2*/)                               \
 do {                                                                                \
-  typeof(_lock) const q = _lock;                                                  \
+  typeof(_lock) const q = _lock;                                                    \
                                                                                     \
   while(1)                                                                          \
   {                                                                                 \
     /*static int total = 0;*/                                                       \
     /*++total;*/                                                                    \
     const int wi = smp_load_acquire(q->write_index);                                \
-    int seq1 = (q)->buffer[wi].seq;                                                 \
+    int seq1 = smp_read_once((q)->buffer[wi].seq);                                  \
     if (seq1 & 1)                                                                   \
     {                                                                               \
       /*fprintf(stderr, "V");*/                                                     \
@@ -98,7 +98,7 @@ do {                                                                            
     _entry = (q)->buffer[wi].entry;                                                 \
     smp_rmb();                                                                      \
                                                                                     \
-    int seq2 = (q)->buffer[wi].seq;                                                 \
+    int seq2 = smp_read_once((q)->buffer[wi].seq);                                  \
     if (seq2 == seq1)                                                               \
     {                                                                               \
       OPT_SET(seq2, __VA_ARGS__)                                                    \
