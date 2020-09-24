@@ -26,9 +26,9 @@ make examples
 Full demo in [examples/cpp_ipc_demo/](examples/cpp_ipc_demo/).
 
 #### Writer
-```
+```cpp
 #include "ipc/ipc.h"
-
+...
 ipc_writer<my_struct> writer("my_topic");
 my_struct entry = {0};
 
@@ -43,9 +43,9 @@ while (1)
 ```
 
 #### Reader
-```
+```cpp
 #include "ipc/ipc.h"
-
+...
 ipc_reader<my_struct> reader("my_topic");
 
 while (1)
@@ -54,22 +54,24 @@ while (1)
 
   if (reader.read(entry) == 0)
   {
-    debug("new entry:\t");
-    my_struct_print(debug_plain, entry, "\n");
+    // use entry
+    int field = entry.field;
   }
 }
 ```
 
 #### Note on ring queues
 
-When using the ring queue based data structure, exposed through `ipc_reader_rq`,
+When using the ring queue-based data structure exposed through `ipc_reader_rq`,
 the reader should read all available elements to avoid exhaustion in case the writer is
 quicker than the reader.
 
 This can be achieved simply by changing the if statement above to a while loop:
 
 
-```
+```cpp
+#include "ipc/ipc.h"
+...
 ipc_reader_rq<my_struct> reader("my_topic");
 
 while (1)
@@ -78,8 +80,8 @@ while (1)
 
   while (reader.read(entry) == 0)
   {
-    debug("new entry:\t");
-    my_struct_print(debug_plain, entry, "\n");
+    // use entry
+    int field = entry.field;
   }
 }
 ```
@@ -91,7 +93,7 @@ It is used internally, but output is off by default.
 
 Configure the debugging output by defining `debug_stdout` and `debug_stderr` to the wanted file descriptors before including `ipc.h`:
 
-```
+```cpp
 #define debug_stdout stdout
 #define debug_stderr stderr
 #include "ipc/ipc.h"
