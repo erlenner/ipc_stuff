@@ -49,7 +49,7 @@ static inline int shmem_unmap(void *addr, int size)
   int res;
 
   res = munmap(addr, size);
-  debug_assert(res == 0, return -1);
+  debug_assert(res == 0, return res);
 
   return 0;
 }
@@ -60,7 +60,7 @@ static inline int shmem_unlink(const char* storage_id)
 
   // shm_open cleanup
   res = shm_unlink(storage_id);
-  debug_assert(res == 0, return -1);
+  debug_assert(res == 0, return res);
 
   return 0;
 }
@@ -70,7 +70,7 @@ static inline int shmem_unlink_all(const char *prefix)
   DIR *dir;
   struct dirent *ent;
   dir = opendir("/dev/shm");
-  debug_assert(dir != NULL, return -1);
+  debug_assert(dir != NULL, return 1);
 
   while((ent = readdir(dir)) != NULL)
   {

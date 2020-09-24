@@ -18,6 +18,7 @@ typedef struct                                                              \
   int read_index;                                                           \
   char padding[CACHELINE_BYTES - sizeof(int)];                              \
   int write_index;                                                          \
+  /*char padding[CACHELINE_BYTES - sizeof(int)];*/                              \
   STORAGE buffer[SIZE];                                                     \
 } __attribute__ ((aligned(CACHELINE_BYTES)))
 
