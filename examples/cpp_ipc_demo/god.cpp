@@ -43,7 +43,7 @@ int fork_child(child *c)
 
   if (pid == 0)
   {
-    debug_error("child %u (%s) was spawned by parent %u\n", getpid(), c->name, getppid());
+    debug("child %u (%s) was spawned by parent %u\n", getpid(), c->name, getppid());
 
     setpgid(0, 0); // switch process group so ctrl-c only interrupts god
 
@@ -53,14 +53,14 @@ int fork_child(child *c)
 
   c->pid = pid;
   c->alive = 1;
-  debug_error("parent %u spawned child %u (%s)\n", getpid(), c->pid, c->name);
+  debug("parent %u spawned child %u (%s)\n", getpid(), c->pid, c->name);
 
   return 0;
 }
 
 void exit_handler(int sig)
 {
-  debug_error("got signal %d\n", sig);
+  debug("got signal %d\n", sig);
 
 
   // kill the children manually, since they're in a different group
@@ -69,14 +69,14 @@ void exit_handler(int sig)
   {
     if (children[i].alive)
     {
-      debug_error("killing %u (%s)\n", children[i].pid, children[i].name);
+      debug("killing %u (%s)\n", children[i].pid, children[i].name);
       debug_assert(kill(children[i].pid, sig) == 0);
     }
   }
 
   ipc_cleanup();
 
-  debug_error("exiting %u (god process) with status %d\n", getpid(), sig);
+  debug("exiting %u (god process) with status %d\n", getpid(), sig);
 
   exit(sig);
 }
@@ -98,11 +98,11 @@ void child_handler(int sig)
   child *c = children + child_index;
 
   c->alive = 0;
-  debug_error("child %u (%s) exited with status %d\n", c->pid, c->name, status);
+  debug("child %u (%s) exited with status %d\n", c->pid, c->name, status);
 
   if (c->restart != 0)
   {
-    debug_error("restarting child\n");
+    debug("restarting child\n");
     fork_child(c);
 
     if (c->restart > 0)
@@ -112,10 +112,12 @@ void child_handler(int sig)
 
 int main()
 {
-  debug_error("starting %u (god process)\n", getpid());
+  debug("starting %u (god process)\n", getpid());
 
   for (int i=0; i < n_children; ++i)
     fork_child(children + i);
+
+  debug("%u (god process) finished spawning threads\n", getpid());
 
   signal(SIGINT, exit_handler);
   signal(SIGCHLD, child_handler);
