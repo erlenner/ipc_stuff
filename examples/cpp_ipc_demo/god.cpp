@@ -5,7 +5,7 @@
 #include <sys/wait.h>
 
 #define debug_stdout stdout
-#define debug_stderr stdout
+#define debug_stderr stderr
 #include "ipc/ipc.h"
 #include "ipc/debug.h"
 

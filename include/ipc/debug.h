@@ -11,19 +11,21 @@
 
 #ifdef debug_stdout
 #define debug(...) debug_f(debug_stdout, __VA_ARGS__)
+#define debug_plain(...) fprintf(debug_stdout, __VA_ARGS__)
 #define debug_instant(...) debug_flush(debug_stdout, __VA_ARGS__)
 #else
 #define debug(...)
+#define debug_plain(...)
 #define debug_instant(...)
 #endif
 
 
 #ifdef debug_stderr
-#define debug_error_plain(...) fprintf(debug_stderr, __VA_ARGS__);
 #define debug_error(...) debug_f(debug_stderr, __VA_ARGS__)
+#define debug_error_plain(...) fprintf(debug_stderr, __VA_ARGS__);
 #else
-#define debug_error_plain(...)
 #define debug_error(...)
+#define debug_error_plain(...)
 #endif
 
 

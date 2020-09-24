@@ -1,6 +1,7 @@
-#include <stdio.h>
 #include <signal.h>
 
+#define debug_stdout stdout
+#define debug_stderr stderr
 #include "ipc/ipc.h"
 #include "ipc/debug.h"
 
@@ -35,7 +36,7 @@ int main()
       last_seq = seq;
 
       debug("new entry:\t");
-      my_struct_print(printf, entry, "\n");
+      my_struct_print(debug_plain, entry, "\n");
     }
 
     usleep(3 * 1000);
