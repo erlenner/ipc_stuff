@@ -1,8 +1,8 @@
 #pragma once
 #include "shmem.h"
 
-
-const char ipc_shmem_prefix[] = "ipc";
+//                                    echo ipc | sha1sum
+const char ipc_shmem_prefix[] = "ipc" "1ef42bc4e0bbfeb0ac34bc3642732768cf6f77b7";
 
 #ifdef __cplusplus
 
@@ -51,6 +51,5 @@ using ipc_reader = ipc_reader_sl<STORAGE>;
 
 int ipc_cleanup()
 {
-  shmem_unlink_all(ipc_shmem_prefix);
-  return 0;
+  return shmem_unlink_all(ipc_shmem_prefix);
 }
