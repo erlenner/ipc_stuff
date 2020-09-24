@@ -19,7 +19,7 @@ using ipc_reader_sl = shmem_data<seq_lock<STORAGE>, false, ipc_shmem_prefix>;
 
 
 // Modified seqlock from http://www.1024cores.net/home/lock-free-algorithms/reader-writer-problem/improved-lock-free-seqlock
-// Functionally similar to the standard seq_lock / ipc_writer_sl
+// Exchangable with the standard seq_lock, ipc_writer_sl
 // Uses more space in exchange for less chance of collisions / retries in reader
 #include "big_seq_lock.h"
 template<typename STORAGE>
