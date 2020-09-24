@@ -48,15 +48,32 @@ while (run)
 {
   my_struct entry;
 
-  int seq = reader.read(entry);
-
-  static int last_seq = 0;
-
-  if (seq != last_seq)
+  if (reader.read(entry) == 0)
   {
-    last_seq = seq;
+    debug("new entry:\t");
+    my_struct_print(debug_plain, entry, "\n");
+  }
+}
+```
 
-    // use entry
+Note: When using the ring queue based data structure, exposed through `ipc_reader_rq`,
+the reader should read all available elements to avoid exhaustion in case the writer is
+quicker than the reader.
+
+This can be achieved simply by changing the if statement above to a while loop:
+
+
+```
+ipc_reader_rq<my_struct> reader("my_topic");
+
+while (run)
+{
+  my_struct entry;
+
+  while (reader.read(entry) == 0)
+  {
+    debug("new entry:\t");
+    my_struct_print(debug_plain, entry, "\n");
   }
 }
 ```
