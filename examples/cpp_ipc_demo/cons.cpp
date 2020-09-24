@@ -27,14 +27,9 @@ int main()
   {
     my_struct entry;
 
-    int seq = reader.read(entry);
-
-    static int last_seq = 0;
-
-    if (seq != last_seq)
+    if (reader.read(entry) == 0)
+    //while (reader.read(entry) == 0) // if using ipc_reader_rq
     {
-      last_seq = seq;
-
       debug("new entry:\t");
       my_struct_print(debug_plain, entry, "\n");
     }

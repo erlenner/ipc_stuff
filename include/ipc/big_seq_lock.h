@@ -105,6 +105,12 @@ do {                                                                            
 } while(0)
 
 #ifdef __cplusplus
+
+struct big_seq_lock_data
+{
+  int last_seq;
+};
+
 template<typename STORAGE, int SIZE>
 class big_seq_lock
 {
@@ -120,12 +126,22 @@ class big_seq_lock
   } buffer[SIZE];                                                           \
 
 public:
-  int write(const STORAGE& entry)
+  int write(const STORAGE& entry, big_seq_lock_data data = {0})
   {
     big_seq_lock_write(this, entry);
     return 0;
   }
 
+  int read(STORAGE& entry, big_seq_lock_data data)
+  {
+    int seq, ret;
+    seq_lock_read(this, entry, seq);
+    ret = (seq == data.last_seq);
+    data.last_seq = seq;
+    return ret;
+  }
+
+  // NOTE: This returns the sequence number
   int read(STORAGE& entry)
   {
     int seq;
@@ -134,6 +150,7 @@ public:
   }
 
   typedef STORAGE storage;
+  typedef big_seq_lock_data data;
 
 } __attribute__ ((aligned(CACHELINE_BYTES)));
 #endif

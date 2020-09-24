@@ -95,6 +95,11 @@ do {                                                                            
   }                                                                                 \
 } while(0)
 
+
+struct ring_queue_data
+{
+};
+
 #ifdef __cplusplus
 template<typename STORAGE, int SIZE>
 class ring_queue
@@ -106,14 +111,14 @@ class ring_queue
   STORAGE buffer[SIZE];                                                     \
 
 public:
-  int write(const STORAGE& entry)
+  int write(const STORAGE& entry, ring_queue_data data = {})
   {
     int err;
     ring_queue_push(this, entry, err);
     return err;
   }
 
-  int read(STORAGE& entry)
+  int read(STORAGE& entry, ring_queue_data data = {})
   {
     int err;
     ring_queue_eat(this, entry, err);
@@ -121,6 +126,7 @@ public:
   }
 
   typedef STORAGE storage;
+  typedef ring_queue_data data;
 
 } __attribute__ ((aligned(CACHELINE_BYTES)));
 #endif

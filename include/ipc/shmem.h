@@ -96,6 +96,7 @@ template<typename DATA_STRUCTURE, bool WRITER, const char* PREFIX = shmem_defaul
 class shmem_data
 {
   DATA_STRUCTURE *ds;
+  typename DATA_STRUCTURE::data data;
   typedef typename DATA_STRUCTURE::storage storage;
 
 public:
@@ -128,13 +129,13 @@ public:
   int write(const storage& entry)
   {
     static_assert(WRITER, "not a writer");
-    return ds->write(entry);
+    return ds->write(entry, data);
   }
 
   int read(storage& entry)
   {
     static_assert(!WRITER, "not a reader");
-    return ds->read(entry);
+    return ds->read(entry, data);
   }
 
 };

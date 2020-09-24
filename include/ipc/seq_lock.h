@@ -88,6 +88,12 @@ do {                                                                            
 
 #ifdef __cplusplus
 
+
+struct seq_lock_data
+{
+  int last_seq;
+};
+
 template<typename STORAGE>
 class seq_lock
 {
@@ -95,12 +101,22 @@ class seq_lock
   STORAGE entry;
 
 public:
-  int write(const STORAGE& entry)
+  int write(const STORAGE& entry, seq_lock_data data = {0})
   {
     seq_lock_write(this, entry);
     return 0;
   }
 
+  int read(STORAGE& entry, seq_lock_data& data)
+  {
+    int seq, ret;
+    seq_lock_read(this, entry, seq);
+    ret = (seq == data.last_seq);
+    data.last_seq = seq;
+    return ret;
+  }
+
+  // NOTE: This returns the sequence number
   int read(STORAGE& entry)
   {
     int seq;
@@ -109,6 +125,7 @@ public:
   }
 
   typedef STORAGE storage;
+  typedef seq_lock_data data;
 
 } __attribute__ ((aligned(CACHELINE_BYTES)));
 
