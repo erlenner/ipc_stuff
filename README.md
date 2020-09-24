@@ -25,7 +25,7 @@ make examples
 ### Minimal Demo
 Full demo in [examples/cpp_ipc_demo/](examples/cpp_ipc_demo/).
 
-# Writer
+#### Writer
 ```
 #include "ipc/ipc.h"
 
@@ -42,13 +42,13 @@ while (1)
 }
 ```
 
-# Reader
+#### Reader
 ```
 #include "ipc/ipc.h"
 
 ipc_reader<my_struct> reader("my_topic");
 
-while (run)
+while (1)
 {
   my_struct entry;
 
@@ -60,7 +60,9 @@ while (run)
 }
 ```
 
-Note: When using the ring queue based data structure, exposed through `ipc_reader_rq`,
+#### Note on ring queues
+
+When using the ring queue based data structure, exposed through `ipc_reader_rq`,
 the reader should read all available elements to avoid exhaustion in case the writer is
 quicker than the reader.
 
@@ -70,7 +72,7 @@ This can be achieved simply by changing the if statement above to a while loop:
 ```
 ipc_reader_rq<my_struct> reader("my_topic");
 
-while (run)
+while (1)
 {
   my_struct entry;
 
