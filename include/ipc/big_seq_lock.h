@@ -132,10 +132,10 @@ public:
     return 0;
   }
 
-  int read(STORAGE& entry, big_seq_lock_data data)
+  int read(STORAGE& entry, big_seq_lock_data& data)
   {
     int seq, ret;
-    seq_lock_read(this, entry, seq);
+    big_seq_lock_read(this, entry, seq);
     ret = (seq == data.last_seq);
     data.last_seq = seq;
     return ret;
