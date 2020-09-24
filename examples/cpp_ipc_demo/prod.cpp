@@ -20,8 +20,7 @@ int main()
   ipc_writer<my_struct> writer;
   debug_assert(writer.init("my_topic") == 0, return -1);
 
-  my_struct entry;
-  memset(&entry, 0, sizeof(entry));
+  my_struct entry = {0};
 
   signal(SIGINT, sig_handler);
 
