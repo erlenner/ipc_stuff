@@ -110,7 +110,7 @@ public:
 
   int init(const char *id)
   {
-    char handle[sizeof(PREFIX) + strlen(id) + 1];
+    char handle[strlen(PREFIX) + 1 + strlen(id) + 1];
     sprintf(handle, "%s_%s", PREFIX, id);
 
     ds = (DATA_STRUCTURE*)shmem_create(handle, sizeof(DATA_STRUCTURE));
