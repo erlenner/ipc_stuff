@@ -57,6 +57,8 @@ while (1)
     // use entry
     int field = entry.field;
   }
+
+  // maybe sleep or do domething else
 }
 ```
 
@@ -83,6 +85,8 @@ while (1)
     // use entry
     int field = entry.field;
   }
+
+  // maybe sleep or do domething else
 }
 ```
 
