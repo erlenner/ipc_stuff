@@ -30,13 +30,11 @@ Full demo in [examples/cpp_ipc_demo/](examples/cpp_ipc_demo/).
 #include "ipc/ipc.h"
 ...
 ipc_writer<my_struct> writer("my_topic");
-my_struct entry = {0};
 
 while (1)
 {
-
-  // modify entry
-  entry.field += 5;
+  // create / obtain entry
+  my_struct entry = { .field = 1 };
 
   writer.write(entry);
 }
