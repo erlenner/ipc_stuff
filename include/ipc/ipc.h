@@ -47,6 +47,37 @@ using ipc_writer = ipc_writer_sl<STORAGE>;
 template<typename STORAGE>
 using ipc_reader = ipc_reader_sl<STORAGE>;
 
+
+
+// helpers with static ipc instances
+#define ipc_write(entry, id)                \
+({                                          \
+  static const char topic[] = id;           \
+  ipc_static_write<topic>(entry); /*c++17*/ \
+})
+
+#define ipc_read(entry, id)                 \
+({                                          \
+  static const char topic[] = id;           \
+  ipc_static_read<topic>(entry);  /*c++17*/ \
+})
+
+template<const char *id, typename STORAGE>
+int ipc_static_write(const STORAGE& entry)
+{
+  static ipc_writer<STORAGE> writer(id);
+
+  return writer.write(entry);
+}
+
+template<const char *id, typename STORAGE>
+int ipc_static_read(STORAGE& entry)
+{
+  static ipc_reader<STORAGE> reader(id);
+
+  return reader.read(entry);
+}
+
 #endif
 
 int ipc_cleanup()
