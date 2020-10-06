@@ -48,35 +48,27 @@ template<typename STORAGE>
 using ipc_reader = ipc_reader_sl<STORAGE>;
 
 
-
 // helpers with static ipc instances
-#define ipc_write(entry, id)                \
-({                                          \
-  static const char topic[] = id;           \
-  ipc_static_write<topic>(entry); /*c++17*/ \
-})
+#include "hash.h"
+#define ipc_read(entry, id) ipc_static_read<typeof(entry), id ## _hash>(entry, id)
+#define ipc_write(entry, id) ipc_static_write<typeof(entry), id ## _hash>(entry, id)
 
-#define ipc_read(entry, id)                 \
-({                                          \
-  static const char topic[] = id;           \
-  ipc_static_read<topic>(entry);  /*c++17*/ \
-})
-
-template<const char *id, typename STORAGE>
-int ipc_static_write(const STORAGE& entry)
+template<typename STORAGE, int id_hash>
+int ipc_static_write(const STORAGE& entry, const char *id)
 {
   static ipc_writer<STORAGE> writer(id);
 
   return writer.write(entry);
 }
 
-template<const char *id, typename STORAGE>
-int ipc_static_read(STORAGE& entry)
+template<typename STORAGE, int id_hash>
+int ipc_static_read(STORAGE& entry, const char *id)
 {
   static ipc_reader<STORAGE> reader(id);
 
   return reader.read(entry);
 }
+
 
 #endif
 

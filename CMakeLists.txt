@@ -6,9 +6,6 @@ project (ipc)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -Wall")
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -O2 -Wall")
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 include_directories(include)
 
 file(GLOB HEADERS "include/ipc/*.h")
