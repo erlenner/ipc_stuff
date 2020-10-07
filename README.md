@@ -55,8 +55,6 @@ while (1)
     // use entry
     int field = entry.field;
   }
-
-  // maybe sleep or do domething else
 }
 ```
 
@@ -83,8 +81,41 @@ while (1)
     // use entry
     int field = entry.field;
   }
+}
+```
 
-  // maybe sleep or do domething else
+### Even more minimal example
+
+This example uses the helper methods `ipc_write` / `ipc_read`, which contain static declared instances of the ipc objects,
+so that the shared memory is allocated / mapped on the first call of `ipc_write` / `ipc_read` with a new entry type or id.
+Full demo in [examples/cpp_ipc_brief_demo/](examples/cpp_ipc_brief_demo/).
+
+#### Writer
+```cpp
+#include "ipc/ipc.h"
+...
+while (1)
+{
+  // create / obtain entry
+  my_struct entry = { .field = 1 };
+
+  ipc_write(entry, "my_topic");
+}
+```
+
+#### Reader
+```cpp
+#include "ipc/ipc.h"
+...
+while (1)
+{
+  my_struct entry;
+
+  if (ipc_read(entry, "my_topic") == 0)
+  {
+    // use entry
+    int field = entry.field;
+  }
 }
 ```
 
