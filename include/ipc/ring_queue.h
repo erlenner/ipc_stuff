@@ -105,6 +105,9 @@ template<typename STORAGE, int SIZE>
 class ring_queue
 {
   static_assert((SIZE & (SIZE - 1)) == 0, "SIZE not binary exponent (2^n)");  \
+  static_assert(std::is_nothrow_copy_assignable<STORAGE>::value);
+  static_assert(std::is_trivially_copy_assignable<STORAGE>::value);
+
   int read_index;                                                           \
   char padding[CACHELINE_BYTES - sizeof(int)];                              \
   int write_index;                                                          \

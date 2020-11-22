@@ -26,10 +26,10 @@ child children[] =
 {
 //==================== FILL IN PROCESSES ====================
   {
-    .name = "cpp_ipc_brief_demo_prod",
+    .name = "/usr/bin/cpp_ipc_brief_demo_prod",
   },
   {
-    .name = "cpp_ipc_brief_demo_cons",
+    .name = "/usr/bin/cpp_ipc_brief_demo_cons",
   },
 //===========================================================
 };

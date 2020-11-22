@@ -97,6 +97,9 @@ struct seq_lock_data
 template<typename STORAGE>
 class seq_lock
 {
+  static_assert(std::is_nothrow_copy_assignable<STORAGE>::value);
+  static_assert(std::is_trivially_copy_assignable<STORAGE>::value);
+
   int seq;
   STORAGE entry;
 

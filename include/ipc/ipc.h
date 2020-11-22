@@ -53,6 +53,25 @@ using ipc_reader = ipc_reader_sl<STORAGE>;
 #define ipc_read(entry, id) ipc_static_read<typeof(entry), id ## _hash>(entry, id)
 #define ipc_write(entry, id) ipc_static_write<typeof(entry), id ## _hash>(entry, id)
 
+#include <sys/time.h>
+inline double ms()
+{
+  struct timeval tp;
+  gettimeofday(&tp, NULL);
+
+  double ms = (double)(tp.tv_sec)*1000 + (double)(tp.tv_usec)/1000;
+  return ms;
+}
+
+inline double toc(double* start)
+{
+  double now = ms();
+  double dt = now - *start;
+  *start = now;
+  printf("toc: %f\n", dt);
+  return dt;
+}
+
 template<typename STORAGE, int id_hash>
 int ipc_static_write(const STORAGE& entry, const char *id)
 {
@@ -64,7 +83,9 @@ int ipc_static_write(const STORAGE& entry, const char *id)
 template<typename STORAGE, int id_hash>
 int ipc_static_read(STORAGE& entry, const char *id)
 {
+  double now = ms();
   static ipc_reader<STORAGE> reader(id);
+  toc(&now);
 
   return reader.read(entry);
 }

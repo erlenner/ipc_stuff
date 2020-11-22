@@ -115,6 +115,9 @@ template<typename STORAGE, int SIZE>
 class big_seq_lock
 {
   static_assert((SIZE & (SIZE - 1)) == 0, "SIZE not binary exponent (2^n)");  \
+  static_assert(std::is_nothrow_copy_assignable<STORAGE>::value);
+  static_assert(std::is_trivially_copy_assignable<STORAGE>::value);
+
   int write_index;                                                          \
   int seq;                                                                  \
   char padding[CACHELINE_BYTES - 2*sizeof(int)];                            \
