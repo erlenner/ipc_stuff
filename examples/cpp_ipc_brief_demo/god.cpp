@@ -9,10 +9,12 @@
 #include "ipc/ipc.h"
 #include "ipc/debug.h"
 
+#define len(array) (int)(sizeof(array) / sizeof(array[0]))
+
 typedef struct
 {
   const char * const name;
-  int respawn;  // -1 = infinite , 0 = never, 1 = once, 2 = twice, etc.
+  int respawn;  // respawn on error: -1 = infinite , 0 = never, 1 = once, 2 = twice, etc.
 
 // internal
   pid_t pid;
@@ -26,7 +28,7 @@ child children[] =
 //==================== FILL IN PROCESSES ====================
   {
     .name = "/usr/bin/cpp_ipc_brief_demo_prod",
-    .respawn = 1,
+    .respawn = -1,
   },
   {
     .name = "/usr/bin/cpp_ipc_brief_demo_cons",
@@ -34,9 +36,12 @@ child children[] =
   },
 //===========================================================
 };
+#define n_children len(children)
 
-#define n_children (int)(sizeof(children) / sizeof(children[0]))
-#define lengthof(var) (sizeof(var) / sizeof(var[0]))
+//==================== STATUSES THAT BYPASS RESPAWN =========
+// Children that are configured to respawn will not be respawned if they return with these statuses:
+int respawn_bypass_statuses[] = { 0, SIGINT };
+//===========================================================
 
 int fork_child(child *c)
 {
@@ -50,11 +55,11 @@ int fork_child(child *c)
 
     setpgid(0, 0); // switch process group so ctrl-c only interrupts god
 
-    char * child_argv[lengthof(c->args) + 2];
+    char * child_argv[len(c->args) + 2];
     child_argv[0] = (char*)(c->name);
-    for (int i=0; i < lengthof(c->args); ++i)
+    for (int i=0; i < len(c->args); ++i)
       child_argv[i+1] = c->args[i];
-    child_argv[lengthof(c->args) + 1] = NULL;
+    child_argv[len(c->args) + 1] = NULL;
 
     execv(c->name, child_argv);
   }
@@ -107,13 +112,22 @@ void child_handler(int sig)
   c->alive = 0;
   debug("child %u (%s) exited with status %d\n", c->pid, c->name, status);
 
-  if (c->respawn != 0)
+  if ((c->respawn != 0))
   {
-    debug("respawning child\n");
-    fork_child(c);
+    int bypass_statuses = 0;
+    for (int i=0; i < len(respawn_bypass_statuses); ++i)
+      if (status == respawn_bypass_statuses[i])
+        ++bypass_statuses;
 
-    if (c->respawn > 0)
+    if (bypass_statuses)
+      debug("respawn bypassed\n");
+    else
+    {
+      debug("respawning child\n");
+      fork_child(c);
+
       --c->respawn;
+    }
   }
 }
 
