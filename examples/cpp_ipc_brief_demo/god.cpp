@@ -9,16 +9,15 @@
 #include "ipc/ipc.h"
 #include "ipc/debug.h"
 
-
-
 typedef struct
 {
-  const char *name;
-  int restart;  // -1 = infinite , 0 = never, 1 = once, 2 = twice, etc.
+  const char * const name;
+  int respawn;  // -1 = infinite , 0 = never, 1 = once, 2 = twice, etc.
 
 // internal
   pid_t pid;
   int alive;
+  char* args[10]; // increase as needed
 
 } child;
 
@@ -27,14 +26,17 @@ child children[] =
 //==================== FILL IN PROCESSES ====================
   {
     .name = "/usr/bin/cpp_ipc_brief_demo_prod",
+    .respawn = 1,
   },
   {
     .name = "/usr/bin/cpp_ipc_brief_demo_cons",
+    .args = { "--my_option", "--my_other_option", },
   },
 //===========================================================
 };
 
 #define n_children (int)(sizeof(children) / sizeof(children[0]))
+#define lengthof(var) (sizeof(var) / sizeof(var[0]))
 
 int fork_child(child *c)
 {
@@ -48,7 +50,12 @@ int fork_child(child *c)
 
     setpgid(0, 0); // switch process group so ctrl-c only interrupts god
 
-    char * const child_argv[] = { (char*)(c->name), NULL };
+    char * child_argv[lengthof(c->args) + 2];
+    child_argv[0] = (char*)(c->name);
+    for (int i=0; i < lengthof(c->args); ++i)
+      child_argv[i+1] = c->args[i];
+    child_argv[lengthof(c->args) + 1] = NULL;
+
     execv(c->name, child_argv);
   }
 
@@ -62,7 +69,6 @@ int fork_child(child *c)
 void exit_handler(int sig)
 {
   debug("got signal %d\n", sig);
-
 
   // kill the children manually, since they're in a different group
   signal(SIGCHLD, SIG_IGN);
@@ -101,13 +107,13 @@ void child_handler(int sig)
   c->alive = 0;
   debug("child %u (%s) exited with status %d\n", c->pid, c->name, status);
 
-  if (c->restart != 0)
+  if (c->respawn != 0)
   {
-    debug("restarting child\n");
+    debug("respawning child\n");
     fork_child(c);
 
-    if (c->restart > 0)
-      --c->restart;
+    if (c->respawn > 0)
+      --c->respawn;
   }
 }
 
